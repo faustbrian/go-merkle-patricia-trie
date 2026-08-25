@@ -11,6 +11,8 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
 
 ### Changed
 
+- Upgrade the cryptographic dependency set to its current secure releases.
+
 - Exclude intentional nested modules from root local-proxy archives so local,
   bootstrap, CI, and public module checksums describe the same source
   boundary.
