@@ -1,10 +1,13 @@
 {
-  "name": "golib-documentation-tools",
+  "name": "merkle-patricia-trie-interoperability",
   "private": true,
+  "type": "module",
   "engines": {
     "node": ">=22.18.0"
   },
   "devDependencies": {
+    "@ethereumjs/mpt": "10.1.2",
+    "@ethereumjs/rlp": "10.1.2",
     "cspell": "10.0.0"
   }
 }

@@ -4,6 +4,11 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
 
 ## [Unreleased]
 
+### Fixed
+
+- Preserve the pinned EthereumJS MPT and RLP oracle dependencies alongside
+  documentation tooling in the standalone Node manifest.
+
 ### Changed
 
 - Exclude intentional nested modules from root local-proxy archives so local,
