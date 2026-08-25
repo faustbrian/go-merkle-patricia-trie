@@ -5,7 +5,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/faustbrian/golib/pkg/merkle-patricia-trie/internal/rlp"
+	"github.com/faustbrian/go-merkle-patricia-trie/internal/rlp"
 )
 
 func TestDecodeNodeRoundTripsCanonicalForms(t *testing.T) {

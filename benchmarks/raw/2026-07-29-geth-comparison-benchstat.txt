@@ -1,6 +1,6 @@
 goos: darwin
 goarch: arm64
-pkg: github.com/faustbrian/golib/pkg/merkle-patricia-trie
+pkg: github.com/faustbrian/go-merkle-patricia-trie
 cpu: Apple M4 Max
                       │ /tmp/mpt-comparison-local-normalized.txt │ /tmp/mpt-comparison-geth-normalized.txt │
                       │                  sec/op                  │     sec/op       vs base                │

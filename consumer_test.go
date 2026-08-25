@@ -25,9 +25,9 @@ func TestCleanExternalConsumer(t *testing.T) {
 
 go 1.26.6
 
-require github.com/faustbrian/golib/pkg/merkle-patricia-trie v0.0.0
+require github.com/faustbrian/go-merkle-patricia-trie v0.0.0
 
-replace github.com/faustbrian/golib/pkg/merkle-patricia-trie => %s
+replace github.com/faustbrian/go-merkle-patricia-trie => %s
 `, filepath.ToSlash(moduleDirectory))
 	writeConsumerFile(t, consumerDirectory, "go.mod", goMod)
 	writeConsumerFile(t, consumerDirectory, "consumer_test.go", `package consumer_test
@@ -36,9 +36,9 @@ import (
 	"context"
 	"testing"
 
-	mpt "github.com/faustbrian/golib/pkg/merkle-patricia-trie"
-	"github.com/faustbrian/golib/pkg/merkle-patricia-trie/filesystem"
-	"github.com/faustbrian/golib/pkg/merkle-patricia-trie/memory"
+	mpt "github.com/faustbrian/go-merkle-patricia-trie"
+	"github.com/faustbrian/go-merkle-patricia-trie/filesystem"
+	"github.com/faustbrian/go-merkle-patricia-trie/memory"
 )
 
 func TestPublicPackages(t *testing.T) {

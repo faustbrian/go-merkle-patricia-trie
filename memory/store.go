@@ -8,7 +8,7 @@ import (
 	"slices"
 	"sync"
 
-	mpt "github.com/faustbrian/golib/pkg/merkle-patricia-trie"
+	mpt "github.com/faustbrian/go-merkle-patricia-trie"
 )
 
 // Store retains immutable encoded nodes and publishes one root at a time.

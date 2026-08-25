@@ -14,7 +14,7 @@ Build `merkle-patricia-trie` as a production-grade open source Go
 implementation of Ethereum's execution-layer modified Merkle Patricia trie.
 
 The module path MUST be
-`github.com/faustbrian/golib/pkg/merkle-patricia-trie`. The root package
+`github.com/faustbrian/go-merkle-patricia-trie`. The root package
 identifier MUST be `mpt`. Go support MUST follow the repository-wide minimum
 toolchain policy.
 

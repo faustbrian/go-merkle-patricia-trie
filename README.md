@@ -1,11 +1,20 @@
 # merkle-patricia-trie
 
+[![CI](https://github.com/faustbrian/go-merkle-patricia-trie/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/faustbrian/go-merkle-patricia-trie/actions/workflows/ci.yml)
+[![CodeQL](https://img.shields.io/badge/CodeQL-required-blue)](https://github.com/faustbrian/go-merkle-patricia-trie/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-100%25_required-blue)](CONTRIBUTING.md#verification)
+[![Mutation](https://img.shields.io/badge/mutation-100%25_required-blue)](CONTRIBUTING.md#verification)
+[![Documentation](https://img.shields.io/badge/docs-checked_in_CI-blue)](docs/)
+[![Go Reference](https://pkg.go.dev/badge/github.com/faustbrian/go-merkle-patricia-trie.svg)](https://pkg.go.dev/github.com/faustbrian/go-merkle-patricia-trie)
+[![Release](https://img.shields.io/github/v/release/faustbrian/go-merkle-patricia-trie?sort=semver)](https://github.com/faustbrian/go-merkle-patricia-trie/releases)
+[![Go](https://img.shields.io/badge/go-1.26.6-00ADD8?logo=go)](https://go.dev/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 `merkle-patricia-trie` is an independent Go implementation of Ethereum's
 execution-layer modified Merkle Patricia trie. Its root package is `mpt`.
 
 The implementation is hardened for the compatibility surface documented
-below. The module remains unreleased and pre-v1 until the repository release
-process publishes a versioned tag. Compatibility claims are limited to the
+below. The module follows stable v1 compatibility. Compatibility claims are limited to the
 pinned sources and executable evidence in
 [source provenance](docs/source-provenance.md).
 
@@ -249,8 +258,8 @@ does not produce a mutable snapshot or persist nodes.
 ## Status
 
 The documented compatibility surface has completed the delivery and hardening
-phases in [architecture](docs/architecture.md). The module remains unreleased
-and pre-v1 until the repository release process publishes a versioned tag; no
+phases in [architecture](docs/architecture.md). The module follows stable v1
+compatibility; no
 claim beyond the pinned evidence should be inferred from package presence.
 
 Licensed under Apache-2.0.

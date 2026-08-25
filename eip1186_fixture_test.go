@@ -9,7 +9,7 @@ import (
 	"os"
 	"testing"
 
-	mpt "github.com/faustbrian/golib/pkg/merkle-patricia-trie"
+	mpt "github.com/faustbrian/go-merkle-patricia-trie"
 )
 
 const eip1186FixtureChecksum = "9ef6b4b3a4b740172a6372c717277de725ace3d8ac0af958d4087bcc13f6d000"

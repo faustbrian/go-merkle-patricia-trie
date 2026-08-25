@@ -3,7 +3,7 @@ GOMAXPROCS=1 GOWORK=off go test -modfile=go.interop.mod -tags=interoperability -
 
 goos: darwin
 goarch: arm64
-pkg: github.com/faustbrian/golib/pkg/merkle-patricia-trie
+pkg: github.com/faustbrian/go-merkle-patricia-trie
 cpu: Apple M4 Max
 BenchmarkComparableRawGetOwned 	  919533	       695.2 ns/op	     104 B/op	       4 allocs/op
 BenchmarkComparableRawGetOwned 	 1000000	      1070 ns/op	     104 B/op	       4 allocs/op
@@ -16,10 +16,10 @@ BenchmarkComparableRawGetOwned 	 2620233	       192.8 ns/op	     104 B/op	      
 BenchmarkComparableRawGetOwned 	 4309590	       280.8 ns/op	     104 B/op	       4 allocs/op
 BenchmarkComparableRawGetOwned 	 2613765	       407.8 ns/op	     104 B/op	       4 allocs/op
 PASS
-ok  	github.com/faustbrian/golib/pkg/merkle-patricia-trie	9.197s
+ok  	github.com/faustbrian/go-merkle-patricia-trie	9.197s
 goos: darwin
 goarch: arm64
-pkg: github.com/faustbrian/golib/pkg/merkle-patricia-trie/_interop
+pkg: github.com/faustbrian/go-merkle-patricia-trie/_interop
 cpu: Apple M4 Max
 BenchmarkComparableRawGetOwned 	 3256120	       229.4 ns/op	      80 B/op	       3 allocs/op
 BenchmarkComparableRawGetOwned 	 2865921	       238.4 ns/op	      80 B/op	       3 allocs/op
@@ -32,4 +32,4 @@ BenchmarkComparableRawGetOwned 	 4305267	       122.2 ns/op	      80 B/op	      
 BenchmarkComparableRawGetOwned 	 5474028	       190.3 ns/op	      80 B/op	       3 allocs/op
 BenchmarkComparableRawGetOwned 	 3214252	       225.2 ns/op	      80 B/op	       3 allocs/op
 PASS
-ok  	github.com/faustbrian/golib/pkg/merkle-patricia-trie/_interop	9.422s
+ok  	github.com/faustbrian/go-merkle-patricia-trie/_interop	9.422s

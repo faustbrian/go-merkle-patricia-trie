@@ -140,7 +140,5 @@ privacy and retention boundary.
 
 ### Is this a stable v1 release?
 
-No. The documented compatibility surface has complete local release evidence,
-but the module remains unreleased and pre-v1 until the repository release
-process publishes a versioned tag. Review the changelog and source provenance
-before adopting an untagged revision.
+Yes, within the documented compatibility surface and pinned provenance. Review
+the changelog and source provenance before adopting a release.

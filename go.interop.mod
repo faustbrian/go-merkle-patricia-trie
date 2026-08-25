@@ -1,4 +1,4 @@
-module github.com/faustbrian/golib/pkg/merkle-patricia-trie
+module github.com/faustbrian/go-merkle-patricia-trie
 
 go 1.26.6
 

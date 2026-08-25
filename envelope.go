@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/faustbrian/golib/pkg/merkle-patricia-trie/internal/rlp"
+	"github.com/faustbrian/go-merkle-patricia-trie/internal/rlp"
 )
 
 // ForkProfile identifies the execution-specification fork whose typed

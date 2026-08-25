@@ -14,7 +14,7 @@ import (
 
 	gethrlp "github.com/ethereum/go-ethereum/rlp"
 
-	localrlp "github.com/faustbrian/golib/pkg/merkle-patricia-trie/internal/rlp"
+	localrlp "github.com/faustbrian/go-merkle-patricia-trie/internal/rlp"
 )
 
 type ethereumJSRLPValue struct {

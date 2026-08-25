@@ -6,9 +6,9 @@ import (
 	"slices"
 	"testing"
 
-	mpt "github.com/faustbrian/golib/pkg/merkle-patricia-trie"
-	"github.com/faustbrian/golib/pkg/merkle-patricia-trie/internal/rlp"
-	"github.com/faustbrian/golib/pkg/merkle-patricia-trie/memory"
+	mpt "github.com/faustbrian/go-merkle-patricia-trie"
+	"github.com/faustbrian/go-merkle-patricia-trie/internal/rlp"
+	"github.com/faustbrian/go-merkle-patricia-trie/memory"
 )
 
 func TestAccountValueAndStateTrieUseCanonicalEthereumEncoding(t *testing.T) {

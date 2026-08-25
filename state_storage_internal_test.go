@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/faustbrian/golib/pkg/merkle-patricia-trie/internal/rlp"
+	"github.com/faustbrian/go-merkle-patricia-trie/internal/rlp"
 )
 
 func TestDecodeStorageWordRejectsMalformedAndNonCanonicalValues(t *testing.T) {

@@ -2,7 +2,7 @@ GOMAXPROCS=1 GOWORK=off go test -run '^$' -bench '^Benchmark' -benchmem -benchti
 
 goos: darwin
 goarch: arm64
-pkg: github.com/faustbrian/golib/pkg/merkle-patricia-trie
+pkg: github.com/faustbrian/go-merkle-patricia-trie
 cpu: Apple M4 Max
 BenchmarkComparableRawGetOwned       	 1000000	       281.0 ns/op	     104 B/op	       4 allocs/op
 BenchmarkComparableRawGetOwned       	 2723084	       126.4 ns/op	     104 B/op	       4 allocs/op
@@ -355,4 +355,4 @@ BenchmarkSortedConstruction          	     100	   5272176 ns/op	 3830429 B/op	  
 BenchmarkSortedConstruction          	      64	   7027664 ns/op	 3830428 B/op	   22395 allocs/op
 BenchmarkSortedConstruction          	     100	   6462408 ns/op	 3830429 B/op	   22395 allocs/op
 PASS
-ok  	github.com/faustbrian/golib/pkg/merkle-patricia-trie	252.891s
+ok  	github.com/faustbrian/go-merkle-patricia-trie	252.891s

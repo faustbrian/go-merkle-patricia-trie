@@ -7,8 +7,8 @@ import (
 	"slices"
 	"testing"
 
-	mpt "github.com/faustbrian/golib/pkg/merkle-patricia-trie"
-	"github.com/faustbrian/golib/pkg/merkle-patricia-trie/internal/rlp"
+	mpt "github.com/faustbrian/go-merkle-patricia-trie"
+	"github.com/faustbrian/go-merkle-patricia-trie/internal/rlp"
 )
 
 func TestCommitAndLoadRawTrie(t *testing.T) {

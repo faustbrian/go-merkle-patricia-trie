@@ -4,12 +4,15 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-08-25
+
 ### Documentation
 
 - Link the package README to the repository-wide Golib documentation portal.
 
 ### Changed
 
+- Publish the module from its standalone `github.com/faustbrian/go-merkle-patricia-trie` identity while preserving its documented API and behavior.
 - Complete the Linux-specific Geth interoperability module graph so the pinned
   reference suite resolves read-only on CI.
 - Link compatibility and source-provenance guidance directly to the canonical
@@ -114,3 +117,6 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
   `TypedTrieValue` pre-v1 API with profile-bound transaction and receipt types.
   Receipt-root callers must now provide the corresponding transaction values so
   EIP-2718 type equality is enforced.
+
+[Unreleased]: https://github.com/faustbrian/go-merkle-patricia-trie/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/faustbrian/go-merkle-patricia-trie/releases/tag/v1.0.0

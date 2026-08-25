@@ -1,33 +1,11 @@
-GO ?= go
-BENCH_TIME ?= 100ms
-BENCH_RELEASE_COUNT ?= 10
-BENCH_RELEASE_TIME ?= 500ms
-FUZZ_TIME ?= 10000x
+SHELL := /usr/bin/env bash
 
-.PHONY: benchmark benchmark-comparison conformance interoperability
+.PHONY: check ci inventory repository-check
 
-benchmark:
-	GOWORK=off $(GO) test -run '^$$' -bench '^Benchmark' \
-		-benchmem -benchtime="$(BENCH_TIME)" ./...
+check:
+	./.golib/scripts/with-disposable-go-cache.sh ./.golib/scripts/run-modules.sh check --all
 
-benchmark-comparison:
-	GOMAXPROCS=1 GOWORK=off $(GO) test -run '^$$' \
-		-bench '^BenchmarkComparableRawGetOwned$$' -benchmem \
-		-benchtime="$(BENCH_RELEASE_TIME)" -count="$(BENCH_RELEASE_COUNT)" .
-	GOMAXPROCS=1 GOWORK=off $(GO) test -modfile=go.interop.mod \
-		-tags=interoperability -run '^$$' \
-		-bench '^BenchmarkComparableRawGetOwned$$' -benchmem \
-		-benchtime="$(BENCH_RELEASE_TIME)" -count="$(BENCH_RELEASE_COUNT)" \
-		./_interop
+ci: repository-check check
 
-conformance:
-	GOWORK=off $(GO) test \
-		-run '^(TestEIP1186RegressionFixture|TestLegacyEthereum|TestExecutionSpec|TestGethReceipt)' \
-		-count=1 .
-
-interoperability:
-	npm ci --ignore-scripts --no-audit --no-fund
-	GOWORK=off $(GO) test -tags=interoperability \
-		-run '^TestEthereumJS' -count=1 ./...
-	GOWORK=off $(GO) test -modfile=go.interop.mod \
-		-tags=interoperability -run '^TestGeth' -count=1 ./_interop
+inventory repository-check:
+	./.golib/scripts/repository-check.sh

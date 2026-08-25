@@ -1,6 +1,6 @@
 goos: darwin
 goarch: arm64
-pkg: github.com/faustbrian/golib/pkg/merkle-patricia-trie/filesystem
+pkg: github.com/faustbrian/go-merkle-patricia-trie/filesystem
 cpu: Apple M4 Max
                      │ benchmarks/raw/2026-07-29-filesystem.txt │
                      │                  sec/op                  │

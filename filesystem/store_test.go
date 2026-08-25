@@ -8,8 +8,8 @@ import (
 	"sort"
 	"testing"
 
-	mpt "github.com/faustbrian/golib/pkg/merkle-patricia-trie"
-	"github.com/faustbrian/golib/pkg/merkle-patricia-trie/filesystem"
+	mpt "github.com/faustbrian/go-merkle-patricia-trie"
+	"github.com/faustbrian/go-merkle-patricia-trie/filesystem"
 )
 
 func TestStorePersistsPublishedTrieAcrossReopen(t *testing.T) {

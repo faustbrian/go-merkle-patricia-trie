@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	mpt "github.com/faustbrian/golib/pkg/merkle-patricia-trie"
+	mpt "github.com/faustbrian/go-merkle-patricia-trie"
 )
 
 func TestStoreCASIterationAndClosedLifecycle(t *testing.T) {

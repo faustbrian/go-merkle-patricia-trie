@@ -12,7 +12,7 @@ import (
 	gethtrie "github.com/ethereum/go-ethereum/trie"
 	"github.com/ethereum/go-ethereum/triedb"
 
-	mpt "github.com/faustbrian/golib/pkg/merkle-patricia-trie"
+	mpt "github.com/faustbrian/go-merkle-patricia-trie"
 )
 
 var gethBenchmarkBytes []byte

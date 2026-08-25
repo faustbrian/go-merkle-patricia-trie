@@ -2,11 +2,11 @@
 
 goos: darwin
 goarch: arm64
-pkg: github.com/faustbrian/golib/pkg/merkle-patricia-trie
+pkg: github.com/faustbrian/go-merkle-patricia-trie
 cpu: Apple M4 Max
 BenchmarkOrdinaryConstruction 	       1	  19062208 ns/op	36730424 B/op	  270953 allocs/op
 PASS
-ok  	github.com/faustbrian/golib/pkg/merkle-patricia-trie	0.211s
+ok  	github.com/faustbrian/go-merkle-patricia-trie	0.211s
         0.65 real         0.14 user         0.19 sys
            105644032  maximum resident set size
                    0  average shared memory size

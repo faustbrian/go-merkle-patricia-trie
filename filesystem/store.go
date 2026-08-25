@@ -16,7 +16,7 @@ import (
 	"strings"
 	"sync"
 
-	mpt "github.com/faustbrian/golib/pkg/merkle-patricia-trie"
+	mpt "github.com/faustbrian/go-merkle-patricia-trie"
 	"golang.org/x/crypto/sha3"
 )
 

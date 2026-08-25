@@ -2,7 +2,7 @@ GOMAXPROCS=1 GOWORK=off go test -run '^$' -bench '^BenchmarkFilesystem(WarmGet|O
 
 goos: darwin
 goarch: arm64
-pkg: github.com/faustbrian/golib/pkg/merkle-patricia-trie/filesystem
+pkg: github.com/faustbrian/go-merkle-patricia-trie/filesystem
 cpu: Apple M4 Max
 BenchmarkFilesystemWarmGet    	    1668	    386635 ns/op	   0.02 MB/s	   28856 B/op	     207 allocs/op
 BenchmarkFilesystemWarmGet    	    1033	    305535 ns/op	   0.03 MB/s	   28856 B/op	     207 allocs/op
@@ -35,4 +35,4 @@ BenchmarkFilesystemCommit     	       4	  88257604 ns/op	   40692 B/op	     351 
 BenchmarkFilesystemCommit     	       6	  56547000 ns/op	   42122 B/op	     357 allocs/op
 BenchmarkFilesystemCommit     	       8	  45520714 ns/op	   43174 B/op	     363 allocs/op
 PASS
-ok  	github.com/faustbrian/golib/pkg/merkle-patricia-trie/filesystem	89.381s
+ok  	github.com/faustbrian/go-merkle-patricia-trie/filesystem	89.381s
