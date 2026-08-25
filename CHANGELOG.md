@@ -4,6 +4,8 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-08-25
+
 ### Fixed
 
 - Preserve the pinned EthereumJS MPT and RLP oracle dependencies alongside
@@ -27,8 +29,6 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
 - Harden standalone documentation validation with deterministic spelling and
   link checks, package-specific documentation gates, and repository-local
   contributor guidance.
-
-## [1.0.0] - 2026-08-25
 
 ### Documentation
 
