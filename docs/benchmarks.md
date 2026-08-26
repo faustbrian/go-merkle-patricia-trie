@@ -2,7 +2,7 @@
 
 ## Claim boundary
 
-Benchmarks characterize this pre-v1 implementation on one recorded machine.
+Benchmarks characterize this v1 implementation on one recorded machine.
 They are not service-level objectives, portable regression thresholds, or
 evidence that a supplied Ethereum root is canonical. The CI benchmark gate is
 a reproducibility smoke test; it does not rank clients.
