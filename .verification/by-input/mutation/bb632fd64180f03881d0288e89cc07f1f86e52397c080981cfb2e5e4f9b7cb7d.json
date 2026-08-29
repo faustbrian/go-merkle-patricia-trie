@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "repository": "github.com/faustbrian/go-merkle-patricia-trie",
+  "module": ".",
+  "package": "internal/rlp",
+  "gate": "mutation",
+  "input_digest": "sha256:bb632fd64180f03881d0288e89cc07f1f86e52397c080981cfb2e5e4f9b7cb7d",
+  "verifier_digest": "sha256:9a9499ff68a8dfd49a0be7995590297a8ee563a1aa226bfd8b9361dc53058108",
+  "result": "passed",
+  "report_digest": "sha256:50c76a084939b9e218d4f632c243c6f587aa6dfed6dfe6bbe68559a97d75797d",
+  "environment": {
+    "CGO_ENABLED": "1",
+    "GOARCH": "arm64",
+    "GOOS": "darwin",
+    "GOVERSION": "go1.26.6",
+    "gremlins_binary_sha256": "sha256:e05bf25d661b16ab96d6f2e17aed481d393930e0f24205cc341b010f887368a0"
+  },
+  "completed_at": "2026-08-29T07:11:23.061229Z"
+}

@@ -3,9 +3,14 @@
 ## Before Editing
 
 1. Read [`AGENTS.md`](AGENTS.md) and the affected module's goals and docs.
-2. Run `make inventory` and the narrow baseline gate for the module.
+2. Use the released `golib` CLI through the repository Makefile; run
+   `make inventory` and the narrow baseline gate for the module.
 3. Identify owned dependencies and reverse dependants in `modules.json`.
 4. Preserve unrelated work and generated/corpus provenance.
+
+The repository keeps package-specific verification inputs under source-owned
+paths. Shared repository checks, tool versions, evidence handling, and CI are
+provided by the pinned `go-library-tools` release rather than copied scripts.
 
 ## Changes
 

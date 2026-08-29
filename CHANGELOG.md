@@ -4,6 +4,25 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
 
 ## [Unreleased]
 
+### Changed
+
+- Adopt the released `go-library-tools` v1.0.5 repository contract with
+  content-addressed verification evidence and immutable shared CI.
+
+### Removed
+
+- Remove copied repository-local Golib scripts and tool-version definitions;
+  package-specific conformance, interoperability, and benchmark commands now
+  remain in the source-owned verification Makefile.
+
+### Documentation
+
+- Align maintained documentation with the stable v1 release contract and
+  remove obsolete candidate or verdict wording.
+
+- Replace obsolete portal links and completed execution artifacts with a
+  standalone, human-oriented documentation structure.
+
 ## [1.0.0] - 2026-08-25
 
 ### Fixed
@@ -32,7 +51,7 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
 
 ### Documentation
 
-- Link the package README to the repository-wide Golib documentation portal.
+- Link the package README to package-owned documentation.
 
 ### Changed
 

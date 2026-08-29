@@ -1,0 +1,149 @@
+schema_version: 1
+tool_version: v1.0.5
+tool_checksums_sha256: 7ee6c6c9bccd76cc1071fb891073055d393701abaed047e0357370f128ba771b
+manifest:
+  modules: modules.json
+  packages: packages.json
+evidence:
+  root: .verification
+mutation:
+  root: .verification/mutation
+  imports:
+    - module: .
+      archive: .verification/mutation/bootstrap/root.zip
+      ledger: .verification/mutation/migration-ledger.json
+api:
+  baselines:
+    - module: .
+      mode: apidiff
+      path: api/baseline.txt
+operations:
+  - module: .
+    gate: conformance
+    steps:
+      - type: make
+        makefile: verification/package.mk
+        target: conformance
+        timeout: 20m
+  - module: .
+    gate: interoperability
+    steps:
+      - type: make
+        makefile: verification/package.mk
+        target: interoperability
+        timeout: 30m
+  - module: .
+    gate: benchmark
+    steps:
+      - type: make
+        makefile: verification/package.mk
+        target: benchmark
+        timeout: 20m
+  - module: .
+    gate: fuzz
+    steps:
+      - type: go-test
+        packages: ["."]
+        fuzz: '^FuzzCanonicalNodeDecodeRoundTrip$'
+        budget: 10000x
+        timeout: 2m
+      - type: go-test
+        packages: ["."]
+        fuzz: '^FuzzEthereumStateAndStorageValueDecoding$'
+        budget: 10000x
+        timeout: 2m
+      - type: go-test
+        packages: ["."]
+        fuzz: '^FuzzSortedBuilderMutationHistoryParity$'
+        budget: 10000x
+        timeout: 2m
+      - type: go-test
+        packages: ["."]
+        fuzz: '^FuzzRawAndSecureRebuildMutationParity$'
+        budget: 10000x
+        timeout: 2m
+      - type: go-test
+        packages: ["."]
+        fuzz: '^FuzzEIP1186AccountAndStorageVerification$'
+        budget: 10000x
+        timeout: 2m
+      - type: go-test
+        packages: ["."]
+        fuzz: '^FuzzCommitRecoveryStateMachine$'
+        budget: 10000x
+        timeout: 2m
+      - type: go-test
+        packages: ["."]
+        fuzz: '^FuzzIterationCancellationAndCallbackFailure$'
+        budget: 10000x
+        timeout: 2m
+      - type: go-test
+        packages: ["."]
+        fuzz: '^FuzzCompactPathCanonicalRoundTrip$'
+        budget: 10000x
+        timeout: 2m
+      - type: go-test
+        packages: ["."]
+        fuzz: '^FuzzEnvelopeValueValidation$'
+        budget: 10000x
+        timeout: 2m
+      - type: go-test
+        packages: ["."]
+        fuzz: '^FuzzProofVerificationRejectsHostileInput$'
+        budget: 10000x
+        timeout: 2m
+      - type: go-test
+        packages: ["."]
+        fuzz: '^FuzzMultiProofVerificationRejectsHostileInput$'
+        budget: 10000x
+        timeout: 2m
+      - type: go-test
+        packages: ["."]
+        fuzz: '^FuzzRangeProofVerificationRejectsHostileInput$'
+        budget: 10000x
+        timeout: 2m
+      - type: go-test
+        packages: ["."]
+        fuzz: '^FuzzRecoveredNodeRejectsHostileInput$'
+        budget: 10000x
+        timeout: 2m
+      - type: go-test
+        packages: ["."]
+        fuzz: '^FuzzCollectReachableNodeRejectsHostileInput$'
+        budget: 10000x
+        timeout: 2m
+      - type: go-test
+        packages: ["."]
+        fuzz: '^FuzzRawTrieMutationAndIterationModel$'
+        budget: 10000x
+        timeout: 2m
+      - type: go-test
+        packages: ["./memory"]
+        fuzz: '^FuzzCommitRetentionAndPruningStateMachine$'
+        budget: 10000x
+        timeout: 2m
+      - type: go-test
+        packages: ["./internal/rlp"]
+        fuzz: '^FuzzCanonicalDecodeRoundTrip$'
+        budget: 10000x
+        timeout: 2m
+      - type: go-test
+        packages: ["./filesystem"]
+        fuzz: '^FuzzRootRecordCanonicalRoundTrip$'
+        budget: 10000x
+        timeout: 2m
+      - type: go-test
+        packages: ["./filesystem"]
+        fuzz: '^FuzzNodeFilenameCanonicalDecode$'
+        budget: 10000x
+        timeout: 2m
+      - type: go-test
+        packages: ["./filesystem"]
+        fuzz: '^FuzzRetentionRecordCanonicalRoundTrip$'
+        budget: 10000x
+        timeout: 2m
+      - type: go-test
+        packages: ["./filesystem"]
+        fuzz: '^FuzzRetentionFilenameCanonicalDecode$'
+        budget: 10000x
+        timeout: 2m
