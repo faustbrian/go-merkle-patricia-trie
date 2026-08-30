@@ -6,8 +6,10 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
 
 ### Changed
 
-- Adopt the released `go-library-tools` v1.0.13 repository contract with
-  content-addressed verification evidence and immutable shared CI.
+- Advance the shared workflow to `go-library-tools` commit
+  `3367371735ac409ba101778aafbdaf8e2560064c` so CI validates specification
+  decisions and monitored authorities while retaining the released v1.0.13
+  local tool contract.
 
 ### Removed
 
@@ -17,11 +19,30 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
 
 ### Documentation
 
+- Add machine-validated MPT and RLP decision, conformance, authority-monitoring,
+  and history records with bounded maintained-peer evidence and no broad
+  compliance claim.
+
 - Align maintained documentation with the stable v1 release contract and
   remove obsolete candidate or verdict wording.
 
 - Replace obsolete portal links and completed execution artifacts with a
   standalone, human-oriented documentation structure.
+
+Decision records:
+
+- MPT-DEC-001 sha256:2ba5a763a1942a391bc46ef49af29e6a0dc1a949ecf9f7cd8ac07aeeca9d7418
+- MPT-DEC-002 sha256:0b6d356faacc3df0bc841b6c5e01b7361f1cc0641f1ce4ffbe960394235e6785
+- MPT-DEC-003 sha256:98926b20816783f5814d61b612cfabc7215d82ecc5b80891b86c223ee4e9084e
+- MPT-DEC-004 sha256:3492de50569a3a40a425d17bfcf70a56c8fff7708224883881f989e6b2fff4a5
+- MPT-DEC-005 sha256:460277c8bb85a3c75b430a190a99bd6fb4f8484216df5736d2c02686ceb9fd6d
+- MPT-DEC-006 sha256:7bfbd351ec14d2498f3bed5b6519b2e4d48810bdeba7a481b695100c931ab0b6
+- MPT-DEC-007 sha256:51cd3a66aefb2d5f155b45c0f93504aabbd6317ffe4d75a53c04e52884a122f4
+- MPT-DEC-008 sha256:a77e9e6397f4953c5c4a9abddce85ca2000338515dace510a62b0a16d39676cc
+- MPT-DEC-009 sha256:cfeda2751d8c15f1b80973efd5ac5c75913440fdfeecb2f2f0a2bba156ef9967
+- MPT-DEC-010 sha256:3d5b790cc5c951e801de2d1c17369da1a01bf863a6766ca85938f5d578873b8b
+
+[Decision register](docs/specification-decisions.md)
 
 ## [1.0.0] - 2026-08-25
 

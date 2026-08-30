@@ -1,0 +1,286 @@
+{
+  "schema_version": 1,
+  "decisions": [
+    {
+      "id": "MPT-DEC-001",
+      "authoritative_sources": [
+        "yellow-paper-mpt-source"
+      ],
+      "executable_evidence": [
+        "TestCanonicalEmptyRoot",
+        "TestRootOwnsBytes",
+        "TestLegacyEthereumTrieRoots",
+        "TestExecutionSpecStateAndTransactionRoots"
+      ],
+      "fixtures": [
+        "testdata/ethereum-tests/MANIFEST.md",
+        "testdata/execution-spec-tests/MANIFEST.md"
+      ],
+      "fuzz": [
+        "FuzzCanonicalNodeDecodeRoundTrip"
+      ],
+      "interoperability_evidence": [],
+      "interoperability_classification": "not assessed",
+      "differential_evidence": [
+        "_interop/geth_interop_test.go",
+        "ethereumjs_interop_test.go"
+      ],
+      "differential_classification": "maintained peer agreement",
+      "public_behavior": [
+        "Public roots are fixed 32-byte legacy Keccak-256 commitments, including the canonical empty root."
+      ]
+    },
+    {
+      "id": "MPT-DEC-002",
+      "authoritative_sources": [
+        "yellow-paper-mpt-source"
+      ],
+      "executable_evidence": [
+        "TestEmptyValueHasDeletionSemantics",
+        "TestSortedBuilderEmptyAndEmptyKey",
+        "TestRawTrieExhaustiveSmallOperationHistories",
+        "TestRawTrieDeletionCompactsToEquivalentState"
+      ],
+      "fixtures": [],
+      "fuzz": [
+        "FuzzRawTrieMutationAndIterationModel",
+        "FuzzSortedBuilderMutationHistoryParity"
+      ],
+      "interoperability_evidence": [],
+      "interoperability_classification": "not assessed",
+      "differential_evidence": [
+        "_interop/geth_interop_test.go",
+        "ethereumjs_interop_test.go"
+      ],
+      "differential_classification": "deliberate policy difference",
+      "public_behavior": [
+        "Empty values delete and the empty raw key is treated like every other raw key."
+      ]
+    },
+    {
+      "id": "MPT-DEC-003",
+      "authoritative_sources": [
+        "yellow-paper-mpt-source"
+      ],
+      "executable_evidence": [
+        "TestCompactPathKnownVectors",
+        "TestCompactPathRejectsNonCanonicalInput",
+        "TestChildReferenceBoundary",
+        "TestExactlyThirtyTwoByteStoredChildIsCanonical"
+      ],
+      "fixtures": [
+        "testdata/ethereum-tests/MANIFEST.md"
+      ],
+      "fuzz": [
+        "FuzzCompactPathCanonicalRoundTrip",
+        "FuzzCanonicalNodeDecodeRoundTrip"
+      ],
+      "interoperability_evidence": [],
+      "interoperability_classification": "not assessed",
+      "differential_evidence": [
+        "_interop/geth_interop_test.go",
+        "ethereumjs_interop_test.go"
+      ],
+      "differential_classification": "maintained peer agreement",
+      "public_behavior": [
+        "Compact paths and child references are canonical, with only encodings shorter than 32 bytes embedded."
+      ]
+    },
+    {
+      "id": "MPT-DEC-004",
+      "authoritative_sources": [
+        "yellow-paper-rlp-source"
+      ],
+      "executable_evidence": [
+        "TestDecodeRejectsMalformedAndNonCanonicalInput",
+        "TestDecodeNestedListAndOwnsBytes",
+        "TestEncodeCanonicalVectors",
+        "TestDecodeNodeRejectsNonCanonicalRLP"
+      ],
+      "fixtures": [],
+      "fuzz": [
+        "FuzzCanonicalDecodeRoundTrip"
+      ],
+      "interoperability_evidence": [],
+      "interoperability_classification": "not assessed",
+      "differential_evidence": [
+        "_interop/rlp_interop_test.go"
+      ],
+      "differential_classification": "deliberate policy difference",
+      "public_behavior": [
+        "RLP decoding accepts exactly one complete canonical item and rejects empty encoded input."
+      ]
+    },
+    {
+      "id": "MPT-DEC-005",
+      "authoritative_sources": [
+        "eip-2718-source",
+        "execution-spec-mpt-source"
+      ],
+      "executable_evidence": [
+        "TestTransactionAndReceiptRootsUseRLPIndexesAndExactEnvelopes",
+        "TestReceiptRootBindsMatchingTransactionTypes",
+        "TestExecutionSpecStateAndTransactionRoots",
+        "TestGethReceiptRoots"
+      ],
+      "fixtures": [
+        "testdata/execution-spec-tests/MANIFEST.md",
+        "testdata/go-ethereum/MANIFEST.md"
+      ],
+      "fuzz": [
+        "FuzzEnvelopeValueValidation"
+      ],
+      "interoperability_evidence": [],
+      "interoperability_classification": "not assessed",
+      "differential_evidence": [
+        "_interop/geth_interop_test.go",
+        "ethereumjs_interop_test.go"
+      ],
+      "differential_classification": "maintained peer agreement",
+      "public_behavior": [
+        "Typed transaction and receipt roots are profile-bound and enforce matching activated types."
+      ]
+    },
+    {
+      "id": "MPT-DEC-006",
+      "authoritative_sources": [
+        "execution-spec-mpt-source",
+        "yellow-paper-mpt-source"
+      ],
+      "executable_evidence": [
+        "TestAccountValueAndStateTrieUseCanonicalEthereumEncoding",
+        "TestStorageTrieCanonicalizesWordsAndDeletesZero",
+        "TestStateTrieDoesNotApplyEmptyAccountLifecycleRules",
+        "TestExecutionSpecStateAndTransactionRoots"
+      ],
+      "fixtures": [
+        "testdata/execution-spec-tests/MANIFEST.md"
+      ],
+      "fuzz": [
+        "FuzzEthereumStateAndStorageValueDecoding"
+      ],
+      "interoperability_evidence": [],
+      "interoperability_classification": "not assessed",
+      "differential_evidence": [
+        "_interop/geth_interop_test.go",
+        "ethereumjs_interop_test.go"
+      ],
+      "differential_classification": "maintained peer agreement",
+      "public_behavior": [
+        "State accounts and storage words use typed canonical Ethereum encodings while account lifecycle remains caller-owned."
+      ]
+    },
+    {
+      "id": "MPT-DEC-007",
+      "authoritative_sources": [
+        "eip-1186-source",
+        "yellow-paper-mpt-source"
+      ],
+      "executable_evidence": [
+        "TestRawMembershipAndAbsenceProofs",
+        "TestProofRejectsMissingMutatedReorderedAndSurplusNodes",
+        "TestRawMultiProofDeduplicatesSharedNodesAndBindsAllClaims",
+        "TestEIP1186AccountAndStorageProofs"
+      ],
+      "fixtures": [
+        "testdata/local-regressions/MANIFEST.md"
+      ],
+      "fuzz": [
+        "FuzzProofVerificationRejectsHostileInput",
+        "FuzzMultiProofVerificationRejectsHostileInput",
+        "FuzzEIP1186AccountAndStorageVerification"
+      ],
+      "interoperability_evidence": [],
+      "interoperability_classification": "not assessed",
+      "differential_evidence": [
+        "_interop/geth_interop_test.go",
+        "ethereumjs_interop_test.go"
+      ],
+      "differential_classification": "maintained peer agreement",
+      "public_behavior": [
+        "Proofs bind every claim and reject noncanonical or surplus witness material."
+      ]
+    },
+    {
+      "id": "MPT-DEC-008",
+      "authoritative_sources": [
+        "geth-proof-source"
+      ],
+      "executable_evidence": [
+        "TestRawRangeProofEstablishesEveryLeafInExplicitInterval",
+        "TestRangeProofRejectsAlteredLeavesAndProofNodes",
+        "TestRangeProofMatchesEverySmallByteInterval"
+      ],
+      "fixtures": [],
+      "fuzz": [
+        "FuzzRangeProofVerificationRejectsHostileInput"
+      ],
+      "interoperability_evidence": [],
+      "interoperability_classification": "not assessed",
+      "differential_evidence": [
+        "_interop/geth_interop_test.go",
+        "ethereumjs_interop_test.go"
+      ],
+      "differential_classification": "deliberate policy difference",
+      "public_behavior": [
+        "Range proofs use half-open intervals and strict deterministic witnesses."
+      ]
+    },
+    {
+      "id": "MPT-DEC-009",
+      "authoritative_sources": [
+        "go-memory-model-source"
+      ],
+      "executable_evidence": [
+        "TestCommitFailureDoesNotPublishOrChangeSnapshot",
+        "TestStoreRejectsStaleRootAtomically",
+        "TestConcurrentWritersSerializeWithoutBlockingReaders",
+        "TestCommitSurvivesProcessTerminationAtPublicationBoundaries"
+      ],
+      "fixtures": [],
+      "fuzz": [
+        "FuzzCommitRecoveryStateMachine",
+        "FuzzCommitRetentionAndPruningStateMachine"
+      ],
+      "interoperability_evidence": [],
+      "interoperability_classification": "not assessed",
+      "differential_evidence": [],
+      "differential_classification": "not assessed",
+      "public_behavior": [
+        "Updates are immutable and publication is atomic after node durability."
+      ]
+    },
+    {
+      "id": "MPT-DEC-010",
+      "authoritative_sources": [
+        "execution-spec-mpt-source",
+        "yellow-paper-mpt-source",
+        "yellow-paper-rlp-source",
+        "eip-2718-source",
+        "eip-1186-source"
+      ],
+      "executable_evidence": [
+        "TestLegacyEthereumFixtureChecksums",
+        "TestExecutionSpecFixtureChecksums",
+        "TestGethReceiptFixtureChecksums"
+      ],
+      "fixtures": [
+        "testdata/ethereum-tests/MANIFEST.md",
+        "testdata/execution-spec-tests/MANIFEST.md",
+        "testdata/go-ethereum/MANIFEST.md"
+      ],
+      "fuzz": [],
+      "interoperability_evidence": [],
+      "interoperability_classification": "not assessed",
+      "differential_evidence": [
+        "_interop/geth_interop_test.go",
+        "_interop/rlp_interop_test.go",
+        "ethereumjs_interop_test.go"
+      ],
+      "differential_classification": "deliberate policy difference",
+      "public_behavior": [
+        "Normative pins outrank fixtures and peers; monitored changes and unresolved contradictions require review."
+      ]
+    }
+  ]
+}

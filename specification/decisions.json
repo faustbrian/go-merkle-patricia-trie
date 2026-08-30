@@ -1,0 +1,546 @@
+{
+  "schema_version": 1,
+  "change_control": {
+    "readme": "README.md",
+    "conformance": "specification/README.md",
+    "compatibility": "COMPATIBILITY.md",
+    "contribution": "CONTRIBUTING.md",
+    "changelog": "CHANGELOG.md",
+    "pull_request_template": ".github/pull_request_template.md"
+  },
+  "decisions": [
+    {
+      "id": "MPT-DEC-001",
+      "title": "Root commitment and empty root",
+      "status": "resolved",
+      "owner": "merkle-patricia-trie maintainers",
+      "classification": "interoperability policy",
+      "decision_scope": "normative",
+      "specification": "Ethereum Yellow Paper modified Merkle Patricia trie",
+      "version": "efc5f9a1f356cba376c978eedb63cb0363c2aa85 (Paper.tex)",
+      "source_authority": "yellow-paper-mpt-source",
+      "section": "Appendix D, equations 190-199",
+      "requirement_strength": "REQUIRED",
+      "issue": "A root API could expose an embedded root-node encoding, an arbitrary digest, or the canonical legacy Keccak-256 commitment; empty roots also require one canonical value.",
+      "interpretations": [
+        "Return raw root RLP when short.",
+        "Always hash root RLP.",
+        "Vary commitment form by storage adapter."
+      ],
+      "peer_behavior": "Pinned Geth, EthereumJS, legacy TrieTests, and execution-spec fixtures use the 32-byte legacy Keccak commitment.",
+      "selected_behavior": "Public roots are always 32-byte legacy Keccak-256 commitments; the empty root is Keccak-256 of RLP empty string, and encoded root nodes are rejected where a commitment is required.",
+      "rationale": "One fixed commitment identity prevents embedded-node and digest confusion while preserving Ethereum execution-layer root bytes.",
+      "security_consequences": "Root validation is fixed-size before proof or storage traversal.",
+      "resource_consequences": "Root validation performs bounded constant-size work.",
+      "compatibility_consequences": "Root bytes match the pinned Ethereum execution-layer authorities and peers; APIs expecting encoded root nodes require adaptation.",
+      "wire_consequences": "The public root is exactly 32 commitment bytes, including for the empty trie.",
+      "executable_evidence": [
+        "TestCanonicalEmptyRoot",
+        "TestRootOwnsBytes",
+        "TestLegacyEthereumTrieRoots",
+        "TestExecutionSpecStateAndTransactionRoots"
+      ],
+      "fixture_evidence": [
+        "testdata/ethereum-tests/MANIFEST.md",
+        "testdata/execution-spec-tests/MANIFEST.md"
+      ],
+      "fuzz_evidence": [
+        "FuzzCanonicalNodeDecodeRoundTrip"
+      ],
+      "interoperability_evidence": [],
+      "differential_evidence": [
+        "_interop/geth_interop_test.go",
+        "ethereumjs_interop_test.go"
+      ],
+      "public_apis": [
+        "Root",
+        "EmptyRoot",
+        "trie root and load APIs"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md",
+        "docs/encoding.md"
+      ],
+      "upstream_status": "The pinned normative source and maintained peers agree for this bounded behavior.",
+      "reconsider_when": "A versioned Ethereum execution-layer profile changes root commitment semantics."
+    },
+    {
+      "id": "MPT-DEC-002",
+      "title": "Empty values and empty raw keys",
+      "status": "resolved",
+      "owner": "merkle-patricia-trie maintainers",
+      "classification": "ambiguity",
+      "decision_scope": "defensive",
+      "specification": "Ethereum Yellow Paper modified Merkle Patricia trie",
+      "version": "efc5f9a1f356cba376c978eedb63cb0363c2aa85 (Paper.tex)",
+      "source_authority": "yellow-paper-mpt-source",
+      "section": "Appendix D, equations 190-199",
+      "requirement_strength": "not specified",
+      "issue": "Ethereum defines an empty value as deletion while the raw key domain does not explicitly exclude a zero-length key, and maintained peers disagree on deleting that key.",
+      "interpretations": [
+        "Store empty values.",
+        "Reject empty raw keys.",
+        "Reset the trie on empty-key deletion.",
+        "Treat the empty raw key like every other key."
+      ],
+      "peer_behavior": "Geth v1.17.3 and the exhaustive local model preserve unrelated keys; EthereumJS MPT v10.1.2 resets a populated raw trie when deleting the empty key.",
+      "selected_behavior": "Empty values delete; the raw profile accepts the empty key and deletion affects only that key, while secure and Ethereum-specific profiles validate their own key widths first.",
+      "rationale": "The selected raw-key behavior preserves the trie mapping model and Geth agreement without allowing an unauthenticated stored empty value.",
+      "security_consequences": "Deletion cannot create an unauthenticated empty-value state.",
+      "resource_consequences": "Empty-key operations use the same bounded depth, node, and storage work as other raw keys.",
+      "compatibility_consequences": "The behavior intentionally differs from the pinned EthereumJS empty-key deletion result.",
+      "wire_consequences": "All non-empty resulting trie encodings remain canonical Ethereum MPT encodings.",
+      "executable_evidence": [
+        "TestEmptyValueHasDeletionSemantics",
+        "TestSortedBuilderEmptyAndEmptyKey",
+        "TestRawTrieExhaustiveSmallOperationHistories",
+        "TestRawTrieDeletionCompactsToEquivalentState"
+      ],
+      "fixture_evidence": [],
+      "fuzz_evidence": [
+        "FuzzRawTrieMutationAndIterationModel",
+        "FuzzSortedBuilderMutationHistoryParity"
+      ],
+      "interoperability_evidence": [],
+      "differential_evidence": [
+        "_interop/geth_interop_test.go",
+        "ethereumjs_interop_test.go"
+      ],
+      "public_apis": [
+        "raw trie update, delete, batch, and builder APIs"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md",
+        "docs/compatibility-decisions.md"
+      ],
+      "upstream_status": "The maintained-peer disagreement is minimized and documented; no normative source resolves the empty raw key policy.",
+      "reconsider_when": "A normative source or official fixture defines empty raw key deletion."
+    },
+    {
+      "id": "MPT-DEC-003",
+      "title": "Compact paths and child-reference boundary",
+      "status": "resolved",
+      "owner": "merkle-patricia-trie maintainers",
+      "classification": "interoperability policy",
+      "decision_scope": "normative",
+      "specification": "Ethereum Yellow Paper modified Merkle Patricia trie",
+      "version": "efc5f9a1f356cba376c978eedb63cb0363c2aa85 (Paper.tex)",
+      "source_authority": "yellow-paper-mpt-source",
+      "section": "Appendix C and Appendix D",
+      "requirement_strength": "REQUIRED",
+      "issue": "Compact-path flags, terminators, padding, and the exact embedded-versus-hashed child boundary admit incompatible encodings if not fixed.",
+      "interpretations": [
+        "Permit caller terminator nibbles or nonzero padding.",
+        "Embed child encodings up to and including 32 bytes.",
+        "Enforce the canonical grammar and strict less-than-32 embedded boundary."
+      ],
+      "peer_behavior": "Pinned Geth, EthereumJS, and legacy TrieTests agree on canonical compact paths and hashed 32-byte child encodings.",
+      "selected_behavior": "Leaf termination is structural metadata; decoding accepts flags 0 through 3, zero even-path padding, and nibbles 0 through 15, rejects invalid or empty extension paths, embeds children shorter than 32 bytes, and hashes children of exactly 32 bytes or longer.",
+      "rationale": "Exact canonical paths and references prevent alternate encodings and preserve byte interoperability.",
+      "security_consequences": "Canonicality prevents path confusion and hash-bypass substitution.",
+      "resource_consequences": "Depth and encoded-size limits are enforced before traversal.",
+      "compatibility_consequences": "Node RLP agrees with the pinned peers at the 31-byte and 32-byte boundary.",
+      "wire_consequences": "Noncanonical compact paths and child references are rejected rather than normalized.",
+      "executable_evidence": [
+        "TestCompactPathKnownVectors",
+        "TestCompactPathRejectsNonCanonicalInput",
+        "TestChildReferenceBoundary",
+        "TestExactlyThirtyTwoByteStoredChildIsCanonical"
+      ],
+      "fixture_evidence": [
+        "testdata/ethereum-tests/MANIFEST.md"
+      ],
+      "fuzz_evidence": [
+        "FuzzCompactPathCanonicalRoundTrip",
+        "FuzzCanonicalNodeDecodeRoundTrip"
+      ],
+      "interoperability_evidence": [],
+      "differential_evidence": [
+        "_interop/geth_interop_test.go",
+        "ethereumjs_interop_test.go"
+      ],
+      "public_apis": [
+        "compact encoding",
+        "node encoding and decoding",
+        "traversal, proof, and storage consumers"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md",
+        "docs/encoding.md"
+      ],
+      "upstream_status": "The pinned normative source and maintained peers agree for this bounded behavior.",
+      "reconsider_when": "A versioned trie profile changes compact encoding or child-reference rules."
+    },
+    {
+      "id": "MPT-DEC-004",
+      "title": "Canonical RLP and empty encoded input",
+      "status": "resolved",
+      "owner": "merkle-patricia-trie maintainers",
+      "classification": "interoperability policy",
+      "decision_scope": "normative",
+      "specification": "Ethereum Yellow Paper Recursive Length Prefix encoding",
+      "version": "efc5f9a1f356cba376c978eedb63cb0363c2aa85 (Paper.tex)",
+      "source_authority": "yellow-paper-rlp-source",
+      "section": "Appendix B",
+      "requirement_strength": "REQUIRED",
+      "issue": "Decoders may accept trailing data, nonminimal lengths, aliased bytes, or zero-byte input as an empty string despite RLP requiring one complete canonical item.",
+      "interpretations": [
+        "Accept and normalize permissive forms.",
+        "Decode empty input as an empty string.",
+        "Require one complete canonical RLP item."
+      ],
+      "peer_behavior": "Geth v1.17.3 rejects empty encoded input; EthereumJS RLP v10.1.2 decodes it as an empty string; both agree on ordinary canonical vectors.",
+      "selected_behavior": "Decode exactly one canonical RLP item and require 0x80 for the empty string; reject empty input, trailing bytes, truncation, nonminimal forms, leading-zero length forms, and over-limit lengths, and never alias decoded bytes to input.",
+      "rationale": "Strict canonicality prevents parser differentials and malleable trie nodes while matching the normative source and Geth.",
+      "security_consequences": "Strict decoding prevents malleable encodings and parser confusion.",
+      "resource_consequences": "Length arithmetic and allocation are bounded before copying untrusted payloads.",
+      "compatibility_consequences": "The EthereumJS empty-input extension is intentionally unsupported.",
+      "wire_consequences": "Only one complete canonical RLP item is accepted or emitted.",
+      "executable_evidence": [
+        "TestDecodeRejectsMalformedAndNonCanonicalInput",
+        "TestDecodeNestedListAndOwnsBytes",
+        "TestEncodeCanonicalVectors",
+        "TestDecodeNodeRejectsNonCanonicalRLP"
+      ],
+      "fixture_evidence": [],
+      "fuzz_evidence": [
+        "FuzzCanonicalDecodeRoundTrip"
+      ],
+      "interoperability_evidence": [],
+      "differential_evidence": [
+        "_interop/rlp_interop_test.go"
+      ],
+      "public_apis": [
+        "internal RLP codec",
+        "every trie, account, envelope, proof, and storage decoder"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md",
+        "docs/encoding.md"
+      ],
+      "upstream_status": "The maintained-peer empty-input disagreement is minimized and classified as a deliberate local canonicality policy.",
+      "reconsider_when": "A superseding normative Ethereum RLP specification changes canonical item framing."
+    },
+    {
+      "id": "MPT-DEC-005",
+      "title": "Typed transaction and receipt envelopes",
+      "status": "resolved",
+      "owner": "merkle-patricia-trie maintainers",
+      "classification": "interoperability policy",
+      "decision_scope": "normative",
+      "specification": "EIP-2718 typed transaction envelopes",
+      "version": "EIPs c55786f4242e5324afd14c6bca890a369a771d7f (EIP-2718)",
+      "source_authority": "eip-2718-source",
+      "section": "Transactions and Receipts",
+      "requirement_strength": "MUST",
+      "issue": "Typed values commit type plus payload, receipt type must match transaction type, activated type ranges differ by fork, and type zero is ambiguous with legacy framing.",
+      "interpretations": [
+        "Accept every byte below 0x80.",
+        "Accept typed zero.",
+        "Ignore receipt and transaction type pairing.",
+        "Accept only types activated by the selected profile."
+      ],
+      "peer_behavior": "Pinned Geth and EthereumJS agree on type 1 through 4 bytes and indexed roots; pinned transition fixtures independently bind receipt roots.",
+      "selected_behavior": "Use distinct transaction and receipt value types, require the transaction sequence for receipt roots, reject typed zero and unactivated types, require canonical list payload framing for known types, and activate types only through explicit fork profiles.",
+      "rationale": "Explicit profile and type binding prevents committing a structurally valid envelope under the wrong transaction or fork type.",
+      "security_consequences": "Receipt and transaction type binding prevents cross-type commitment confusion.",
+      "resource_consequences": "Envelope counts, payload bytes, RLP depth, and indexed work are bounded.",
+      "compatibility_consequences": "Unknown future envelope types fail closed until a profile activates them.",
+      "wire_consequences": "Indexed transaction and receipt roots match the selected pinned execution fork for the covered types.",
+      "executable_evidence": [
+        "TestTransactionAndReceiptRootsUseRLPIndexesAndExactEnvelopes",
+        "TestReceiptRootBindsMatchingTransactionTypes",
+        "TestExecutionSpecStateAndTransactionRoots",
+        "TestGethReceiptRoots"
+      ],
+      "fixture_evidence": [
+        "testdata/execution-spec-tests/MANIFEST.md",
+        "testdata/go-ethereum/MANIFEST.md"
+      ],
+      "fuzz_evidence": [
+        "FuzzEnvelopeValueValidation"
+      ],
+      "interoperability_evidence": [],
+      "differential_evidence": [
+        "_interop/geth_interop_test.go",
+        "ethereumjs_interop_test.go"
+      ],
+      "public_apis": [
+        "transaction and receipt values",
+        "fork profiles",
+        "transaction-root and receipt-root helpers"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md",
+        "docs/profiles-and-proofs.md"
+      ],
+      "upstream_status": "The pinned EIP, execution fixtures, and maintained peers agree for the explicitly activated type set.",
+      "reconsider_when": "A supported fork activates or redefines an envelope type."
+    },
+    {
+      "id": "MPT-DEC-006",
+      "title": "State accounts and storage words",
+      "status": "resolved",
+      "owner": "merkle-patricia-trie maintainers",
+      "classification": "interoperability policy",
+      "decision_scope": "normative",
+      "specification": "Ethereum execution specifications Merkle Patricia trie",
+      "version": "44d2b9cbd028b48f13e6ebf2635f977141cc397b (merkle_patricia_trie.py)",
+      "source_authority": "execution-spec-mpt-source",
+      "section": "State trie, account encoding, and storage trie",
+      "requirement_strength": "REQUIRED",
+      "issue": "Account integer widths, secure key hashing, storage integer normalization, zero deletion, and fork-sensitive empty-account clearing must not be conflated.",
+      "interpretations": [
+        "Accept pre-encoded account bytes.",
+        "Normalize malformed storage words.",
+        "Hash paths more than once.",
+        "Apply fork-sensitive account clearing inside the trie."
+      ],
+      "peer_behavior": "Pinned Geth, EthereumJS, and execution-spec-tests fixtures agree on the covered account bytes, secure paths, state roots, and storage roots.",
+      "selected_behavior": "Encode accounts from typed U64 and U256 fields as one four-item RLP list, hash exact 20-byte addresses and 32-byte slots once, store minimally represented nonzero U256 storage words, delete zero, reject malformed stored integers, and leave empty-account lifecycle logic to callers.",
+      "rationale": "Typed construction and strict stored-value validation prevent double hashing and normalization ambiguity without claiming ownership of fork lifecycle logic.",
+      "security_consequences": "Malformed integers and double-hashed keys are rejected.",
+      "resource_consequences": "Key, value, proof, and storage work remain bounded.",
+      "compatibility_consequences": "Account and storage commitments agree with the pinned fixtures and peers for the tested profiles.",
+      "wire_consequences": "The package does not apply or claim fork-sensitive account lifecycle mutations.",
+      "executable_evidence": [
+        "TestAccountValueAndStateTrieUseCanonicalEthereumEncoding",
+        "TestStorageTrieCanonicalizesWordsAndDeletesZero",
+        "TestStateTrieDoesNotApplyEmptyAccountLifecycleRules",
+        "TestExecutionSpecStateAndTransactionRoots"
+      ],
+      "fixture_evidence": [
+        "testdata/execution-spec-tests/MANIFEST.md"
+      ],
+      "fuzz_evidence": [
+        "FuzzEthereumStateAndStorageValueDecoding"
+      ],
+      "interoperability_evidence": [],
+      "differential_evidence": [
+        "_interop/geth_interop_test.go",
+        "ethereumjs_interop_test.go"
+      ],
+      "public_apis": [
+        "AccountValue",
+        "StateTrie",
+        "StorageTrie",
+        "state and storage proof helpers"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md",
+        "docs/profiles-and-proofs.md"
+      ],
+      "upstream_status": "The claim is bounded to pinned fixture and maintained-peer cases, not full execution-specification compliance.",
+      "reconsider_when": "A supported execution fork changes account or storage trie encoding."
+    },
+    {
+      "id": "MPT-DEC-007",
+      "title": "Membership, absence, and multi-proof strictness",
+      "status": "resolved",
+      "owner": "merkle-patricia-trie maintainers",
+      "classification": "omission",
+      "decision_scope": "defensive",
+      "specification": "EIP-1186 account and storage proof response",
+      "version": "EIPs c55786f4242e5324afd14c6bca890a369a771d7f (EIP-1186)",
+      "source_authority": "eip-1186-source",
+      "section": "eth_getProof",
+      "requirement_strength": "not specified",
+      "issue": "Proof node order, duplicate or surplus nodes, claim and profile binding, and shared-node handling are not fully standardized by the transport response.",
+      "interpretations": [
+        "Accept any useful node set.",
+        "Ignore surplus nodes.",
+        "Require a deterministic minimal ordered witness bound to every claim and profile."
+      ],
+      "peer_behavior": "Pinned Geth and EthereumJS proofs verify bidirectionally for the covered raw, account, storage, membership, and absence cases.",
+      "selected_behavior": "Bind root, key path, expected value or absence, and profile; require canonical ordered nodes; deduplicate shared multi-proof nodes; reject missing, duplicate, reordered, surplus, malformed, or conflicting claims; and keep EIP-1186 JSON transport outside the package.",
+      "rationale": "Exact claim and witness binding prevents proof smuggling while separating the Go proof model from JSON-RPC transport claims.",
+      "security_consequences": "Strict witness validation prevents ambiguous, surplus, or conflicting proof material.",
+      "resource_consequences": "Node count, bytes, reads, depth, claims, and cancellation are bounded.",
+      "compatibility_consequences": "Canonical Ethereum proof node bytes interoperate in the covered peer cases.",
+      "wire_consequences": "The package does not claim to implement the EIP-1186 JSON-RPC response format.",
+      "executable_evidence": [
+        "TestRawMembershipAndAbsenceProofs",
+        "TestProofRejectsMissingMutatedReorderedAndSurplusNodes",
+        "TestRawMultiProofDeduplicatesSharedNodesAndBindsAllClaims",
+        "TestEIP1186AccountAndStorageProofs"
+      ],
+      "fixture_evidence": [
+        "testdata/local-regressions/MANIFEST.md"
+      ],
+      "fuzz_evidence": [
+        "FuzzProofVerificationRejectsHostileInput",
+        "FuzzMultiProofVerificationRejectsHostileInput",
+        "FuzzEIP1186AccountAndStorageVerification"
+      ],
+      "interoperability_evidence": [],
+      "differential_evidence": [
+        "_interop/geth_interop_test.go",
+        "ethereumjs_interop_test.go"
+      ],
+      "public_apis": [
+        "single, multi, account, and storage proof generation and verification APIs"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md",
+        "docs/profiles-and-proofs.md"
+      ],
+      "upstream_status": "No normative transport-neutral proof envelope resolves the package strictness choices.",
+      "reconsider_when": "A normative Ethereum proof envelope defines ordering or surplus-node rules."
+    },
+    {
+      "id": "MPT-DEC-008",
+      "title": "Range-proof interval and witness contract",
+      "status": "resolved",
+      "owner": "merkle-patricia-trie maintainers",
+      "classification": "interoperability policy",
+      "decision_scope": "defensive",
+      "specification": "go-ethereum MPT proof interoperability",
+      "version": "go-ethereum v1.17.3 at 117e067f0f0bae1a17082321f224dedb6765b10f",
+      "source_authority": "geth-proof-source",
+      "section": "trie/proof.go range proof implementation",
+      "requirement_strength": "not specified",
+      "issue": "Range endpoints, unbounded ranges, witness ordering, surplus useful nodes, and secure-key hashing vary between APIs and maintained peers.",
+      "interpretations": [
+        "Use inclusive endpoints.",
+        "Accept extra useful nodes.",
+        "Hash secure endpoints again.",
+        "Define one exact interval and witness sequence."
+      ],
+      "peer_behavior": "Geth v1.17.3 accepts generated witnesses; EthereumJS MPT v10.1.2 reproduces roots and edge nodes except for its documented duplicate-child limitation.",
+      "selected_behavior": "Use half-open start-inclusive end-exclusive raw byte order with empty end unbounded, require exact consecutive leaves and deterministic intersecting hashed-node witnesses, keep embedded children in parents, reject unused nodes, and expose already-transformed 32-byte secure paths.",
+      "rationale": "Exact bounds and witness use make completeness claims deterministic without weakening local validation to peer permissiveness.",
+      "security_consequences": "Strict bounds and surplus rejection prevent incomplete or ambiguous range claims.",
+      "resource_consequences": "Item, proof, byte, depth, read, work, and cancellation limits apply.",
+      "compatibility_consequences": "Generated raw witnesses are accepted by pinned Geth and by the supported EthereumJS subset.",
+      "wire_consequences": "The stricter local witness rejects extras Geth may tolerate and excludes the documented EthereumJS oracle defect.",
+      "executable_evidence": [
+        "TestRawRangeProofEstablishesEveryLeafInExplicitInterval",
+        "TestRangeProofRejectsAlteredLeavesAndProofNodes",
+        "TestRangeProofMatchesEverySmallByteInterval"
+      ],
+      "fixture_evidence": [],
+      "fuzz_evidence": [
+        "FuzzRangeProofVerificationRejectsHostileInput"
+      ],
+      "interoperability_evidence": [],
+      "differential_evidence": [
+        "_interop/geth_interop_test.go",
+        "ethereumjs_interop_test.go"
+      ],
+      "public_apis": [
+        "raw and secure range-proof generation and verification"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md",
+        "docs/profiles-and-proofs.md",
+        "docs/compatibility-decisions.md"
+      ],
+      "upstream_status": "The result is a package policy with bounded peer interoperability evidence, not a general range-proof standard claim.",
+      "reconsider_when": "A normative range-proof standard or fixed maintained peer changes the shared contract."
+    },
+    {
+      "id": "MPT-DEC-009",
+      "title": "Immutable snapshots and atomic publication",
+      "status": "resolved",
+      "owner": "merkle-patricia-trie maintainers",
+      "classification": "omission",
+      "decision_scope": "application-policy",
+      "specification": "Go memory model",
+      "version": "Go 1.26.0 go_mem.html",
+      "source_authority": "go-memory-model-source",
+      "section": "Synchronization",
+      "requirement_strength": "not specified",
+      "issue": "Ethereum trie specifications do not define Go snapshot ownership or multi-step node and root publication semantics.",
+      "interpretations": [
+        "Mutate tries in place.",
+        "Publish roots before nodes.",
+        "Return immutable snapshots and atomically publish a root only after durable node writes."
+      ],
+      "peer_behavior": "Storage lifecycle is package policy rather than Ethereum consensus behavior; the memory and filesystem adapters implement the same publication contract.",
+      "selected_behavior": "Updates return immutable snapshots; commit writes immutable content-addressed nodes before compare-and-swap root publication; failures do not publish or mutate snapshots; loaded snapshots remain source-store bound until rebuilt; readers remain stable while writers serialize publication.",
+      "rationale": "One synchronization and publication contract prevents partial state and stale-root overwrite without changing trie bytes.",
+      "security_consequences": "Partial writes cannot become committed roots and stale writers cannot silently replace newer state.",
+      "resource_consequences": "Node, byte, read, write, depth, and retained-state limits bound operations.",
+      "compatibility_consequences": "Store implementations must honor atomic publication and byte ownership.",
+      "wire_consequences": "Persistence mechanics do not change trie roots or node RLP.",
+      "executable_evidence": [
+        "TestCommitFailureDoesNotPublishOrChangeSnapshot",
+        "TestStoreRejectsStaleRootAtomically",
+        "TestConcurrentWritersSerializeWithoutBlockingReaders",
+        "TestCommitSurvivesProcessTerminationAtPublicationBoundaries"
+      ],
+      "fixture_evidence": [],
+      "fuzz_evidence": [
+        "FuzzCommitRecoveryStateMachine",
+        "FuzzCommitRetentionAndPruningStateMachine"
+      ],
+      "interoperability_evidence": [],
+      "differential_evidence": [],
+      "public_apis": [
+        "trie snapshots",
+        "NodeStore",
+        "commit, load, rebuild, memory, and filesystem adapters"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md",
+        "docs/filesystem-store.md",
+        "docs/operations.md"
+      ],
+      "upstream_status": "This is explicitly package policy and not an Ethereum consensus or wire compliance claim.",
+      "reconsider_when": "A new store contract proves equivalent durability with different publication mechanics."
+    },
+    {
+      "id": "MPT-DEC-010",
+      "title": "Authority and disagreement handling",
+      "status": "resolved",
+      "owner": "merkle-patricia-trie maintainers",
+      "classification": "interoperability policy",
+      "decision_scope": "application-policy",
+      "specification": "Ethereum execution specifications Merkle Patricia trie",
+      "version": "44d2b9cbd028b48f13e6ebf2635f977141cc397b (merkle_patricia_trie.py)",
+      "source_authority": "execution-spec-mpt-source",
+      "section": "Repository conformance authority",
+      "requirement_strength": "not specified",
+      "issue": "Yellow Paper text, fork-aware executable specifications, official fixtures, and client behavior can differ, and majority client behavior is not automatically consensus authority.",
+      "interpretations": [
+        "Follow the most popular client.",
+        "Follow any passing fixture.",
+        "Use an explicit source hierarchy and stop on unresolved normative contradictions."
+      ],
+      "peer_behavior": "Pinned official fixtures, Geth, and EthereumJS agree on covered roots and proofs except for the explicitly recorded empty-key, empty-RLP-input, and range-proof limitations.",
+      "selected_behavior": "Use pinned normative text and fork-aware execution specifications first, official fixtures second, and maintained clients only as interoperability evidence; minimize and classify disagreements; keep unresolved normative contradictions release-blocking; never silently change behavior when monitored authorities move.",
+      "rationale": "An explicit hierarchy prevents peer popularity or fixture coverage from becoming an unsupported compliance claim.",
+      "security_consequences": "Normative conflicts cannot silently weaken canonicality or proof validation.",
+      "resource_consequences": "Authority monitoring is bounded by fixed content size, HTTPS, digest, and review-interval checks.",
+      "compatibility_consequences": "A source or decision change requires explicit compatibility review.",
+      "wire_consequences": "Peer agreement alone never authorizes a wire-format change.",
+      "executable_evidence": [
+        "TestLegacyEthereumFixtureChecksums",
+        "TestExecutionSpecFixtureChecksums",
+        "TestGethReceiptFixtureChecksums"
+      ],
+      "fixture_evidence": [
+        "testdata/ethereum-tests/MANIFEST.md",
+        "testdata/execution-spec-tests/MANIFEST.md",
+        "testdata/go-ethereum/MANIFEST.md"
+      ],
+      "fuzz_evidence": [],
+      "interoperability_evidence": [],
+      "differential_evidence": [
+        "_interop/geth_interop_test.go",
+        "_interop/rlp_interop_test.go",
+        "ethereumjs_interop_test.go"
+      ],
+      "public_apis": [
+        "all specification-backed public APIs and release decisions"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md",
+        "docs/source-provenance.md",
+        "COMPATIBILITY.md"
+      ],
+      "upstream_status": "Known peer disagreements are classified locally; no unresolved normative contradiction is claimed as passing.",
+      "reconsider_when": "A pinned normative authority, official fixture release, or maintained peer reveals a new material disagreement."
+    }
+  ]
+}

@@ -4,12 +4,14 @@
     {
       "name": "Ethereum Yellow Paper",
       "revision": "efc5f9a1f356cba376c978eedb63cb0363c2aa85",
-      "url": "https://github.com/ethereum/yellowpaper/tree/efc5f9a1f356cba376c978eedb63cb0363c2aa85"
+      "source_sha256": "e24873bc2edc6f41fad1c319299f2ceff4e21b243a0fba83a61cfed4a11eb618",
+      "url": "https://raw.githubusercontent.com/ethereum/yellowpaper/efc5f9a1f356cba376c978eedb63cb0363c2aa85/Paper.tex"
     },
     {
       "name": "ethereum/execution-specs",
       "revision": "44d2b9cbd028b48f13e6ebf2635f977141cc397b",
-      "url": "https://github.com/ethereum/execution-specs/tree/44d2b9cbd028b48f13e6ebf2635f977141cc397b"
+      "source_sha256": "bde4015aef39329bebbb73c8013827aebd1c586f607caac2730d5195eee426bc",
+      "url": "https://raw.githubusercontent.com/ethereum/execution-specs/44d2b9cbd028b48f13e6ebf2635f977141cc397b/src/ethereum/merkle_patricia_trie.py"
     },
     {
       "name": "ethereum/execution-spec-tests stable fixtures",

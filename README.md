@@ -62,7 +62,9 @@ Updates return new immutable snapshots. Empty values delete keys. Use
 
 Use the [documentation index](docs/README.md) for profiles, proofs, storage,
 security, compatibility, and operations. The [detailed reference](docs/reference.md)
-contains the full storage, recovery, EIP-1186, and state-trie contracts.
+contains the full storage, recovery, EIP-1186, and state-trie contracts. The
+[specification decision register](docs/specification-decisions.md) defines the
+audited conformance boundary and known peer divergences.
 
 ## Development
 
