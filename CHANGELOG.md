@@ -6,7 +6,7 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
 
 ### Changed
 
-- Adopt the released `go-library-tools` v1.0.5 repository contract with
+- Adopt the released `go-library-tools` v1.0.13 repository contract with
   content-addressed verification evidence and immutable shared CI.
 
 ### Removed
