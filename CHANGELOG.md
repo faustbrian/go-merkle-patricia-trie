@@ -6,10 +6,9 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
 
 ### Changed
 
-- Advance the shared workflow to `go-library-tools` commit
-  `3367371735ac409ba101778aafbdaf8e2560064c` so CI validates specification
-  decisions and monitored authorities while retaining the released v1.0.13
-  local tool contract.
+- Adopt the checksum-pinned `go-library-tools` v1.2.0 repository contract and
+  immutable `1f9629e5f27418600460b55a50a5b2fc81697fab` workflow so CI executes
+  specification decisions and monitored-authority enforcement.
 
 ### Removed
 
