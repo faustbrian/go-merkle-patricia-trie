@@ -66,6 +66,10 @@ contains the full storage, recovery, EIP-1186, and state-trie contracts. The
 [specification decision register](docs/specification-decisions.md) defines the
 audited conformance boundary and known peer divergences.
 
+For ecosystem-wide package selection and ownership conventions, see the
+[versioned Golib ecosystem index](https://github.com/faustbrian/go-library-tools/blob/v1.3.0/docs/ecosystem/README.md)
+and its design-language guidance.
+
 ## Development
 
 Run `make check` for the repository contract and the documented conformance

@@ -6,9 +6,12 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
 
 ### Changed
 
-- Adopt the checksum-pinned `go-library-tools` v1.2.0 repository contract and
-  immutable `1f9629e5f27418600460b55a50a5b2fc81697fab` workflow so CI executes
-  specification decisions and monitored-authority enforcement.
+- Publish schema-v2 consumer and engineering catalog metadata, versioned
+  ecosystem navigation, and a local cohesion gate through checksum-pinned
+  `go-library-tools` v1.3.0.
+
+- Execute specification decisions and monitored-authority enforcement through
+  the immutable `6c76f5c670d193ce369a7242d4c634f1117286e9` v1.3.0 reusable workflow.
 
 ### Removed
 

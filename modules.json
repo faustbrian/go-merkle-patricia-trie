@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "repository": "github.com/faustbrian/go-merkle-patricia-trie",
   "go_version": "1.26.6",
   "modules": [
@@ -112,6 +112,90 @@
         "race": true,
         "security": true,
         "tests": true
+      },
+      "cohesion": {
+        "family": "domain-utilities",
+        "secondary_capabilities": [
+          "cryptography-and-secrets",
+          "database-and-storage"
+        ],
+        "responsibility": "Provide bounded immutable Ethereum modified Merkle Patricia tries, roots, proofs, storage integration, retention, pruning, and recovery.",
+        "non_goals": [
+          "Own an EVM, blockchain, network, JSON-RPC service, or application root authority."
+        ],
+        "public_package_identifier": "mpt",
+        "primary_entry_packages": [
+          "github.com/faustbrian/go-merkle-patricia-trie"
+        ],
+        "package_selection": {
+          "github.com/faustbrian/go-merkle-patricia-trie": "Use mpt for immutable trie construction, updates, roots, proofs, retention, pruning, and recovery.",
+          "github.com/faustbrian/go-merkle-patricia-trie/filesystem": "Use filesystem when trie nodes require caller-closed durable local storage.",
+          "github.com/faustbrian/go-merkle-patricia-trie/memory": "Use memory for process-local node storage without a resource lifecycle."
+        },
+        "lifecycle_status": "active",
+        "maturity": "stable",
+        "construction_styles": [
+          "builder-build",
+          "load",
+          "open",
+          "validated-value"
+        ],
+        "lifecycle_styles": [
+          "close",
+          "stateless"
+        ],
+        "ownership": {
+          "configuration": "caller",
+          "mutable_inputs": [
+            "copy"
+          ],
+          "runtime_resources": "caller",
+          "background_work": "none"
+        },
+        "optional_owned_dependencies": [],
+        "adapters": [],
+        "companions": [
+          "github.com/faustbrian/go-merkle-patricia-trie/filesystem",
+          "github.com/faustbrian/go-merkle-patricia-trie/memory"
+        ],
+        "supported_go": {
+          "minimum": "1.26.6",
+          "tested": [
+            "1.26.6"
+          ]
+        },
+        "supported_platforms": [
+          "portable-go"
+        ],
+        "supported_backends": [
+          "filesystem",
+          "memory"
+        ],
+        "supported_protocols": [
+          "eip-1186",
+          "eip-2718",
+          "ethereum-mpt",
+          "rlp"
+        ],
+        "documentation": {
+          "readme": "README.md",
+          "api": "docs/reference.md",
+          "adoption": "docs/adoption.md",
+          "security": "docs/security.md",
+          "compatibility": "docs/compatibility-decisions.md",
+          "performance": "docs/benchmarks.md",
+          "examples": "example_test.go",
+          "faq": "docs/adoption.md",
+          "changelog": "CHANGELOG.md",
+          "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-merkle-patricia-trie",
+          "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.3.0/docs/ecosystem/README.md"
+        },
+        "known_good_compatibility_sets": [],
+        "delivery": {
+          "implementation": "not-started",
+          "hardening": "not-started",
+          "release": "not-started"
+        }
       }
     }
   ]
