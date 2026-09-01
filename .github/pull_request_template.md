@@ -12,10 +12,13 @@ Omit topics that do not apply.
 For parsing, validation, serialization, resolution, canonicalization,
 transport, or protocol changes, list:
 
-- affected decision identifiers;
+- each affected decision identifier;
 - changed normative sources, registries, fixtures, or errata;
 - selected observable behavior and alternatives considered;
 - compatibility and wire consequences;
-- executable conformance and interoperability evidence.
+- executable conformance and interoperability evidence;
+- the corresponding changelog entry.
+
+Preserve superseded identifiers in the register and link their replacements.
 
 State `Not applicable` only when no specification-backed behavior can change.

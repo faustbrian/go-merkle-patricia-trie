@@ -82,7 +82,12 @@
       ],
       "specifications": [
         "Ethereum Yellow Paper modified Merkle Patricia trie",
-        "Ethereum Recursive Length Prefix encoding"
+        "Ethereum Yellow Paper Recursive Length Prefix encoding",
+        "Ethereum execution specifications Merkle Patricia trie",
+        "EIP-2718 typed transaction envelopes",
+        "EIP-1186 account and storage proof response",
+        "go-ethereum MPT proof interoperability",
+        "Go memory model"
       ],
       "conformance_corpora": [
         "ethereum/execution-spec-tests stable fixtures v5.4.0 at 88e9fb8f10ed89805aa3110d0a2cd5dcadc19689",

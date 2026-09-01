@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "entries": [
+    {"id":"MPT-DEC-001","digests":["2ba5a763a1942a391bc46ef49af29e6a0dc1a949ecf9f7cd8ac07aeeca9d7418"]},
+    {"id":"MPT-DEC-002","digests":["0b6d356faacc3df0bc841b6c5e01b7361f1cc0641f1ce4ffbe960394235e6785"]},
+    {"id":"MPT-DEC-003","digests":["98926b20816783f5814d61b612cfabc7215d82ecc5b80891b86c223ee4e9084e"]},
+    {"id":"MPT-DEC-004","digests":["3492de50569a3a40a425d17bfcf70a56c8fff7708224883881f989e6b2fff4a5"]},
+    {"id":"MPT-DEC-005","digests":["460277c8bb85a3c75b430a190a99bd6fb4f8484216df5736d2c02686ceb9fd6d"]},
+    {"id":"MPT-DEC-006","digests":["7bfbd351ec14d2498f3bed5b6519b2e4d48810bdeba7a481b695100c931ab0b6"]},
+    {"id":"MPT-DEC-007","digests":["51cd3a66aefb2d5f155b45c0f93504aabbd6317ffe4d75a53c04e52884a122f4"]},
+    {"id":"MPT-DEC-008","digests":["a77e9e6397f4953c5c4a9abddce85ca2000338515dace510a62b0a16d39676cc"]},
+    {"id":"MPT-DEC-009","digests":["cfeda2751d8c15f1b80973efd5ac5c75913440fdfeecb2f2f0a2bba156ef9967"]},
+    {"id":"MPT-DEC-010","digests":["3d5b790cc5c951e801de2d1c17369da1a01bf863a6766ca85938f5d578873b8b"]}
+  ]
+}
