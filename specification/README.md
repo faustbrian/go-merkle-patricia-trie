@@ -11,6 +11,25 @@ reviewed change feeds. [`provenance.json`](provenance.json) pins imported
 fixture and peer versions. [`conformance.json`](conformance.json) is the
 machine-readable evidence map.
 
+## Upstream review history
+
+### 2026-09-03
+
+- The execution-specifications Amsterdam feed advanced from commit
+  `c4deda5b3cfc5c1c8429dcd9159a6fb5636d8486` to
+  `1855bb169fdf8b29ff7fb1eb6396e855549c9d7e`; the exact MPT source retained
+  Git blob `0dbf455ad215e7c8f25ae35cf5149e1fc957b2a1`.
+- The EIPs feed advanced from commit
+  `889f8c1e26e9b418f83721083098ca225b14fc0b` to
+  `94f5a3e3c146c28625d9ab2f8a7c0a848530a13a`; EIP-2718 and EIP-1186 retained
+  Git blobs `83a19b0fa865dc31b483cd97f35c417928792d7c` and
+  `1a341c3f9b8094955d386ad63b5c04e3bcc491f3`.
+- The Go release feed advanced through Go 1.26.8 without changing the pinned
+  Go memory-model bytes. These source checks leave MPT decisions 005 through
+  007 and 009 behavior-neutral; decision 010 records the reviewed, benign feed
+  movement. Pinned normative source bindings and runtime behavior are
+  unchanged.
+
 | Decision | Primary authority | Evidence boundary | Differential classification |
 | --- | --- | --- | --- |
 | MPT-DEC-001 | `yellow-paper-mpt-source` | Root commitment and official roots | Maintained peer agreement |

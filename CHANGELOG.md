@@ -21,6 +21,10 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
 
 ### Documentation
 
+- Record behavior-neutral execution-specification, EIP, and Go authority
+  reviews: the monitored feeds advanced while the exact MPT, EIP-2718,
+  EIP-1186, and Go memory-model sources remained unchanged.
+
 - Add machine-validated MPT and RLP decision, conformance, authority-monitoring,
   and history records with bounded maintained-peer evidence and no broad
   compliance claim.
