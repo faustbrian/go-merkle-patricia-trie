@@ -13,6 +13,24 @@ machine-readable evidence map.
 
 ## Upstream review history
 
+### 2026-09-04
+
+- The execution-specifications Amsterdam feed advanced from commit
+  `1855bb169fdf8b29ff7fb1eb6396e855549c9d7e` to
+  `132d1149a257c5174dfd2f38f8cf1cb521780f06`. The seven intervening commits
+  changed tests, tooling, and unrelated gas accounting only; the exact MPT
+  source retained Git blob
+  `0dbf455ad215e7c8f25ae35cf5149e1fc957b2a1`. Pinned authority bindings,
+  decisions, and runtime behavior remain unchanged.
+- The EIPs feed advanced from commit
+  `94f5a3e3c146c28625d9ab2f8a7c0a848530a13a` to
+  `7243c92ba812437c64bae9fc6524ee269b29daa9`. The eleven intervening commits
+  updated EIP-2780, EIP-7906, EIP-8037, EIP-8130, and EIP-8272 and added an
+  unrelated proposal; EIP-2718 and EIP-1186 retained Git blobs
+  `83a19b0fa865dc31b483cd97f35c417928792d7c` and
+  `1a341c3f9b8094955d386ad63b5c04e3bcc491f3`. Their decisions and runtime
+  behavior remain unchanged.
+
 ### 2026-09-03
 
 - The execution-specifications Amsterdam feed advanced from commit

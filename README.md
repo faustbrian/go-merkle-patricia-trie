@@ -67,8 +67,8 @@ contains the full storage, recovery, EIP-1186, and state-trie contracts. The
 audited conformance boundary and known peer divergences.
 
 For ecosystem-wide package selection and ownership conventions, see the
-[versioned Golib ecosystem index](https://github.com/faustbrian/go-library-tools/blob/v1.3.0/docs/ecosystem/README.md)
-and its design-language guidance.
+[versioned Golib ecosystem index](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/README.md)
+and its [Domain utilities family](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/design-language.md#package-families-and-selection).
 
 ## Development
 
