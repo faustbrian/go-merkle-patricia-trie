@@ -6,6 +6,11 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
 
 ### Changed
 
+- Adopt the checksum-verified `go-library-tools` v1.4.0 CLI and immutable W14
+  reusable workflow, and align local configuration, inventory, cohesion,
+  repository, online specification, workflow, and implementation gates without
+  changing the public API or runtime behavior.
+
 - Publish schema-v2 consumer and engineering catalog metadata, versioned
   ecosystem navigation, and a local cohesion gate through checksum-pinned
   `go-library-tools` v1.3.0.
@@ -20,6 +25,13 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
   remain in the source-owned verification Makefile.
 
 ### Documentation
+
+- Record the behavior-neutral 2026-09-04 reviews of the Amsterdam execution-
+  specification and EIPs feeds; the exact MPT, EIP-2718, and EIP-1186 source
+  blobs remain unchanged.
+
+- Link ecosystem and Domain utilities family guidance to the immutable v1.4.0
+  documentation release.
 
 - Record behavior-neutral execution-specification, EIP, and Go authority
   reviews: the monitored feeds advanced while the exact MPT, EIP-2718,
