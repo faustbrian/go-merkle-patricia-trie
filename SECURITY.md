@@ -2,9 +2,11 @@
 
 ## Reporting
 
-Report suspected vulnerabilities privately through the GitHub security
-advisory for `faustbrian/go-merkle-patricia-trie`. Do not open a public issue containing exploit
-details, credentials, private fixtures, or affected deployment information.
+Do not open a public issue for a suspected vulnerability. Report it privately
+through [GitHub Security Advisories for
+`faustbrian/go-merkle-patricia-trie`](https://github.com/faustbrian/go-merkle-patricia-trie/security/advisories/new)
+before public disclosure. Do not include credentials, private fixtures, or
+affected deployment information in a public report.
 
 Include the affected module and version, impact, reproduction, preconditions,
 and any suggested mitigation. Reports are acknowledged as soon as practical;
@@ -12,9 +14,11 @@ timelines depend on severity and verification.
 
 ## Supported Versions
 
-The latest stable `v1` release line receives security fixes. Support windows
-are documented per module and in
-[`COMPATIBILITY.md`](COMPATIBILITY.md).
+The latest stable `v1` release receives security fixes. Older releases and the
+`main` branch are not supported; upgrade before reporting. At and after v1,
+incompatible exported API or documented behavior changes require a new major
+version under the [compatibility policy](COMPATIBILITY.md) and
+[deprecation policy](DEPRECATION.md).
 
 ## Security Gates
 

@@ -18,6 +18,22 @@ caller-owned storage, recovery, retention, and pruning.
 It does not implement an EVM, blockchain, network, JSON-RPC server, binary
 Merkle tree, SSZ merkleization, or Verkle tree.
 
+## Status and portability
+
+The module is stable at v1 and requires Go 1.26.6. Its root package uses the
+default import identifier `mpt`; the public `memory` and `filesystem` packages
+provide process-local and durable stores. The implementation is portable Go:
+it has no platform-specific production source files and requires no cgo. The
+root and memory packages require no operating-system service or external
+runtime backend. The optional filesystem package uses a caller-owned local
+directory. These portability statements do not imply validation on every
+`GOOS` and `GOARCH` combination.
+
+Callers own configuration, authoritative-root selection, and runtime
+resources. Trie snapshots and the memory store have no close lifecycle or
+background work. A filesystem store must be opened and closed by its caller,
+and its directory must have one exclusive owner.
+
 ## Installation
 
 ```sh
@@ -47,6 +63,11 @@ root, err := trie.Root()
 Updates return new immutable snapshots. Empty values delete keys. Use
 `NewSecureTrie` when keys must be legacy-Keccak transformed exactly once.
 
+The checked-in [`ExampleRawTrie`](example_test.go) is the executable
+five-minute version of this flow. It is compiled and run by the Go example test
+gate. The same file contains executable examples for secure, state, and storage
+tries, proofs, and caller-owned persistence.
+
 ## Guarantees and limits
 
 - Canonical nibble paths, hex-prefix encoding, RLP, and embedded-versus-hashed
@@ -60,9 +81,14 @@ Updates return new immutable snapshots. Empty values delete keys. Use
 
 ## Documentation
 
-Use the [documentation index](docs/README.md) for profiles, proofs, storage,
-security, compatibility, and operations. The [detailed reference](docs/reference.md)
-contains the full storage, recovery, EIP-1186, and state-trie contracts. The
+Use the [documentation index](docs/README.md) for the complete guide set. Start
+with [adoption and FAQ](docs/adoption.md), the
+[detailed reference](docs/reference.md), and the
+[executable examples](example_test.go). Operational and project navigation is
+available through [storage and recovery](docs/operations.md), the
+[filesystem-store guide](docs/filesystem-store.md), [support](SUPPORT.md),
+[security reporting](SECURITY.md), the [compatibility policy](COMPATIBILITY.md),
+the [changelog](CHANGELOG.md), and the [license](LICENSE). The
 [specification decision register](docs/specification-decisions.md) defines the
 audited conformance boundary and known peer divergences.
 
