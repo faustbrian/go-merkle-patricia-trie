@@ -26,6 +26,10 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
 
 ### Documentation
 
+- Document stable-v1 maturity, the exact Go and package identifiers, portable
+  Go and resource-lifecycle boundaries, executable examples, and complete
+  support and security navigation.
+
 - Record the behavior-neutral 2026-09-04 reviews of the Amsterdam execution-
   specification and EIPs feeds; the exact MPT, EIP-2718, and EIP-1186 source
   blobs remain unchanged.
@@ -62,7 +66,7 @@ Decision records:
 
 [Decision register](docs/specification-decisions.md)
 
-## [1.0.0] - 2026-08-25
+## [1.0.0] - 2026-08-26
 
 ### Fixed
 
