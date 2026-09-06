@@ -13,6 +13,16 @@ machine-readable evidence map.
 
 ## Upstream review history
 
+### 2026-09-06
+
+- The EIPs feed advanced from commit
+  `9207c6011f526bd40abd79649484a1a342585bd4` to
+  `a9031bdc85949321a9707dd59ba44cdcba4a0eb0`. The sole intervening commit
+  added EIP-8360 only; EIP-2718 and EIP-1186 retained Git blobs
+  `83a19b0fa865dc31b483cd97f35c417928792d7c` and
+  `1a341c3f9b8094955d386ad63b5c04e3bcc491f3`. Their decisions and runtime
+  behavior remain unchanged.
+
 ### 2026-09-05
 
 - The execution-specifications Amsterdam feed advanced from commit

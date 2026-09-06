@@ -26,6 +26,12 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
 
 ### Documentation
 
+- Clarify that the root module uses `v<version>` tags while independently
+  releasable nested modules use `<module-directory>/v<version>` tags.
+
+- Record the behavior-neutral 2026-09-06 EIPs review: EIP-8360 was added while
+  the exact EIP-2718 and EIP-1186 source blobs remained unchanged.
+
 - Record the behavior-neutral 2026-09-05 reviews of the Amsterdam execution-
   specification and EIPs feeds; the exact MPT, EIP-2718, and EIP-1186 source
   blobs remain unchanged.
