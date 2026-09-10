@@ -7,7 +7,7 @@
 [![Documentation](https://img.shields.io/badge/docs-checked_in_CI-blue)](docs/)
 [![Go Reference](https://pkg.go.dev/badge/github.com/faustbrian/go-merkle-patricia-trie.svg)](https://pkg.go.dev/github.com/faustbrian/go-merkle-patricia-trie)
 [![Release](https://img.shields.io/github/v/release/faustbrian/go-merkle-patricia-trie?sort=semver)](https://github.com/faustbrian/go-merkle-patricia-trie/releases)
-[![Go](https://img.shields.io/badge/go-1.26.6-00ADD8?logo=go)](https://go.dev/)
+[![Go](https://img.shields.io/badge/go-1.27.0-00ADD8?logo=go)](https://go.dev/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 `merkle-patricia-trie` implements Ethereum's execution-layer modified Merkle
@@ -20,7 +20,7 @@ Merkle tree, SSZ merkleization, or Verkle tree.
 
 ## Status and portability
 
-The module is stable at v1 and requires Go 1.26.6. Its root package uses the
+The module is stable at v1 and requires Go 1.27.0. Its root package uses the
 default import identifier `mpt`; the public `memory` and `filesystem` packages
 provide process-local and durable stores. The implementation is portable Go:
 it has no platform-specific production source files and requires no cgo. The

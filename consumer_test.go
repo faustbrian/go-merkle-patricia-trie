@@ -23,7 +23,7 @@ func TestCleanExternalConsumer(t *testing.T) {
 
 	goMod := fmt.Sprintf(`module example.test/mpt-consumer
 
-go 1.26.6
+go 1.27.0
 
 require github.com/faustbrian/go-merkle-patricia-trie v0.0.0
 
