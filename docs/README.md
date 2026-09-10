@@ -1,6 +1,6 @@
 # Documentation
 
-`merkle-patricia-trie` is stable at v1 and requires Go 1.26.6. Its root public
+`merkle-patricia-trie` is stable at v1 and requires Go 1.27.0. Its root public
 package uses the default import identifier `mpt`; the public `memory` and
 `filesystem` packages provide process-local and durable stores. The
 implementation is portable Go with no platform-specific production source
