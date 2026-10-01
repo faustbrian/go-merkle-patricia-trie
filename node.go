@@ -4,27 +4,82 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/faustbrian/go-merkle-patricia-trie/internal/rlp"
+	"github.com/faustbrian/go-merkle-patricia-trie/v2/internal/rlp"
 )
 
 type node = any
 
 type leafNode struct {
-	path  []byte
-	value []byte
+	path      []byte
+	value     []byte
+	footprint decodedFootprint
 }
 
 type extensionNode struct {
-	path  []byte
-	child node
+	path      []byte
+	child     node
+	footprint decodedFootprint
 }
 
 type branchNode struct {
-	children [16]node
-	value    []byte
+	children  [16]node
+	value     []byte
+	footprint decodedFootprint
 }
 
 type hashNode Root
+
+// decodedFootprint is derived immutable graph metadata, not a separate
+// admission policy. Constructors combine at most sixteen child summaries.
+// Distinct leaf buffers count independently even when their hashes coincide.
+type decodedFootprint struct {
+	nodes    int
+	bytes    int
+	depth    int
+	complete bool
+}
+
+func footprintAdd(left, right int) int {
+	maximum := int(^uint(0) >> 1)
+	if right > maximum-left {
+		return maximum
+	}
+	return left + right
+}
+
+func decodedNodeFootprint(current node) decodedFootprint {
+	switch current := current.(type) {
+	case *leafNode:
+		if current.footprint.nodes != 0 {
+			return current.footprint
+		}
+		return decodedFootprint{nodes: 1, bytes: footprintAdd(len(current.path), len(current.value)), complete: true}
+	case *extensionNode:
+		if current.footprint.nodes != 0 {
+			return current.footprint
+		}
+		child := decodedNodeFootprint(current.child)
+		return decodedFootprint{nodes: footprintAdd(1, child.nodes), bytes: footprintAdd(len(current.path), child.bytes), depth: footprintAdd(1, child.depth), complete: child.complete}
+	case *branchNode:
+		if current.footprint.nodes != 0 {
+			return current.footprint
+		}
+		result := decodedFootprint{nodes: 1, bytes: len(current.value), complete: true}
+		for _, child := range current.children {
+			if child == nil {
+				continue
+			}
+			part := decodedNodeFootprint(child)
+			result.nodes = footprintAdd(result.nodes, part.nodes)
+			result.bytes = footprintAdd(result.bytes, part.bytes)
+			result.depth = max(result.depth, footprintAdd(1, part.depth))
+			result.complete = result.complete && part.complete
+		}
+		return result
+	default:
+		return decodedFootprint{complete: false}
+	}
+}
 
 func newLeaf(path, value []byte) (*leafNode, error) {
 	if len(value) == 0 {
@@ -33,10 +88,12 @@ func newLeaf(path, value []byte) (*leafNode, error) {
 	if err := validateNibbles(path); err != nil {
 		return nil, err
 	}
-	return &leafNode{
+	leaf := &leafNode{
 		path:  append([]byte(nil), path...),
 		value: append([]byte(nil), value...),
-	}, nil
+	}
+	leaf.footprint = decodedNodeFootprint(leaf)
+	return leaf, nil
 }
 
 func newExtension(path []byte, child node) (*extensionNode, error) {
@@ -53,7 +110,9 @@ func newExtension(path []byte, child node) (*extensionNode, error) {
 	case *leafNode, *extensionNode:
 		return nil, fmt.Errorf("%w: adjacent compact nodes", ErrMalformedNode)
 	}
-	return &extensionNode{path: append([]byte(nil), path...), child: child}, nil
+	extension := &extensionNode{path: append([]byte(nil), path...), child: child}
+	extension.footprint = decodedNodeFootprint(extension)
+	return extension, nil
 }
 
 func newBranch(children [16]node, value []byte) (*branchNode, error) {
@@ -69,7 +128,9 @@ func newBranch(children [16]node, value []byte) (*branchNode, error) {
 	if len(value) != 0 && childCount == 0 {
 		return nil, fmt.Errorf("%w: value-only branch", ErrMalformedNode)
 	}
-	return &branchNode{children: children, value: append([]byte(nil), value...)}, nil
+	branch := &branchNode{children: children, value: append([]byte(nil), value...)}
+	branch.footprint = decodedNodeFootprint(branch)
+	return branch, nil
 }
 
 func validateNibbles(path []byte) error {
@@ -101,8 +162,17 @@ func encodeNodeBounded(
 	current node,
 	maximumNodes int,
 	budget *workBudget,
+	pendingLimits ...Limits,
 ) ([]byte, map[Root][]byte, error) {
-	state := encodingState{ctx: ctx, nodesLeft: maximumNodes, budget: budget}
+	limits := DefaultLimits()
+	if len(pendingLimits) != 0 {
+		limits = pendingLimits[0]
+	}
+	state := encodingState{
+		ctx: ctx, nodesLeft: maximumNodes, budget: budget,
+		pendingBounded: len(pendingLimits) != 0, pendingNodes: limits.MaxPendingNodes - 1,
+		pendingBytes: limits.MaxPendingBytes, persisted: make(map[Root]struct{}),
+	}
 	encoded, err := encodeNodeValue(current, &state)
 	if err != nil {
 		return nil, nil, err
@@ -111,9 +181,13 @@ func encodeNodeBounded(
 }
 
 type encodingState struct {
-	ctx       context.Context
-	nodesLeft int
-	budget    *workBudget
+	ctx            context.Context
+	nodesLeft      int
+	budget         *workBudget
+	pendingBounded bool
+	pendingNodes   int
+	pendingBytes   int
+	persisted      map[Root]struct{}
 }
 
 func (state *encodingState) visit() error {
@@ -169,7 +243,9 @@ func encodeNodeValue(current node, state *encodingState) (nodeEncoding, error) {
 				return nodeEncoding{}, err
 			}
 			values = append(values, reference)
-			mergePersisted(persisted, childPersisted)
+			if err := mergePersisted(state.ctx, persisted, childPersisted); err != nil {
+				return nodeEncoding{}, err
+			}
 		}
 		values = append(values, rlp.String(current.value))
 		return encodeRLPValue(rlp.List(values...), persisted)
@@ -198,7 +274,9 @@ func childReference(
 	state *encodingState,
 ) (rlp.Value, map[Root][]byte, error) {
 	persisted := make(map[Root][]byte)
-	mergePersisted(persisted, child.persisted)
+	if err := mergePersisted(state.ctx, persisted, child.persisted); err != nil {
+		return rlp.Value{}, nil, err
+	}
 	if len(child.bytes) < RootBytes {
 		return child.value, persisted, nil
 	}
@@ -206,7 +284,17 @@ func childReference(
 	if err != nil {
 		return rlp.Value{}, nil, err
 	}
-	persisted[root] = append([]byte(nil), child.bytes...)
+	if state.pendingBounded {
+		if _, duplicate := state.persisted[root]; !duplicate {
+			if state.pendingNodes == 0 || len(child.bytes) > state.pendingBytes {
+				return rlp.Value{}, nil, fmt.Errorf("%w: pending encoding bound exceeded", ErrResourceLimit)
+			}
+			state.pendingNodes--
+			state.pendingBytes -= len(child.bytes)
+			state.persisted[root] = struct{}{}
+		}
+	}
+	persisted[root] = child.bytes
 	return rlp.String(root[:]), persisted, nil
 }
 
@@ -221,10 +309,24 @@ func encodeRLPValue(value rlp.Value, persisted map[Root][]byte) (nodeEncoding, e
 	return nodeEncoding{value: value, bytes: encoded, persisted: persisted}, nil
 }
 
-func mergePersisted(target, source map[Root][]byte) {
-	for root, encoded := range source {
-		target[root] = append([]byte(nil), encoded...)
+func mergePersisted(ctx context.Context, target, source map[Root][]byte) error {
+	if err := checkContext(ctx); err != nil {
+		return err
 	}
+	for root, encoded := range source {
+		if err := checkContext(ctx); err != nil {
+			return err
+		}
+		target[root] = encoded
+	}
+	return checkContext(ctx)
+}
+
+func checkEncodedNodeBytes(encoded []byte) error {
+	if len(encoded) > rlp.DefaultLimits().MaxEncodedBytes {
+		return fmt.Errorf("%w: encoded node byte bound exceeded", ErrResourceLimit)
+	}
+	return nil
 }
 
 func decodeNode(encoded []byte) (node, error) {

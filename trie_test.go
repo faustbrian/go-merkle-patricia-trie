@@ -6,7 +6,7 @@ import (
 	"slices"
 	"testing"
 
-	mpt "github.com/faustbrian/go-merkle-patricia-trie"
+	mpt "github.com/faustbrian/go-merkle-patricia-trie/v2"
 	"golang.org/x/crypto/sha3"
 )
 

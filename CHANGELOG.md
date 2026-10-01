@@ -6,6 +6,27 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
 
 ### Changed
 
+- Target v2 with the official `/v2` module/import path. Memory stores now apply
+  finite cumulative node/encoded-byte admission to new and zero-value stores;
+  explicit positive limits and pruning control historical retention capacity.
+  Lowered lease-count policies reject additional retentions when existing
+  leases already exceed the new bound.
+- Add finite snapshot admission in `Limits`, bounding pending-node unions,
+  stale ancestry, and distinct materialized-cache buffers. Early compaction,
+  replacement and deletion reclaim capacity without changing roots or bytes.
+- Preflight multi-proof key lengths before copying, and bound aggregate range
+  item bytes independently of deduplicated witnesses using `MaxProofBytes`.
+- Update the SHA-3 dependency to `golang.org/x/crypto` v0.56.0, which fixes
+  module-only SSH advisories; the production import remains SHA-3 only.
+- Enforce canonical storage-response byte limits and reader-return cancellation
+  before copying or hashing. Redact default storage diagnostics while retaining
+  typed underlying causes. Immutable commit handles support adapter preflight
+  without redundant encoded-byte copies; canonical roots and records are unchanged.
+- Observe cancellation during pending materialization, compaction and commit
+  handle preparation without publishing partially prepared state.
+- Preserve shared content-addressed nodes across sibling mutations, proofs,
+  commits and reloads. Observe cancellation while transferring recovery overlays.
+
 - Adopt the checksum-verified `go-library-tools` v1.4.0 CLI and immutable W14
   reusable workflow, and align local configuration, inventory, cohesion,
   repository, online specification, workflow, and implementation gates without
@@ -25,6 +46,11 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
   remain in the source-owned verification Makefile.
 
 ### Documentation
+
+- Document the full-family threat model and v2 upgrade boundaries. Refresh the
+  actual 2026-09-30 monitored authority responses: execution MPT, EIP-2718,
+  EIP-1186 and Geth proof bytes remain unchanged; normative pins and decisions
+  are retained.
 
 - Clarify that the root module uses `v<version>` tags while independently
   releasable nested modules use `<module-directory>/v<version>` tags.

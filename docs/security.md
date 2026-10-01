@@ -26,3 +26,8 @@ nodes, proofs, preimages, or credentials.
 A valid proof establishes a key/value, absence, or exact range-completeness
 claim under the supplied root. It does not establish that the root is
 canonical, finalized, recent, or authorized.
+
+The complete family threat model, bound ownership, mitigations, and review
+triggers are recorded in [the threat model](threat-model.md). Backend causes
+remain explicitly inspectable but their default storage-error strings are
+redacted; callers must not turn cause inspection into automatic sensitive logs.

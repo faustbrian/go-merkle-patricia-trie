@@ -6,7 +6,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/faustbrian/go-merkle-patricia-trie/internal/rlp"
+	"github.com/faustbrian/go-merkle-patricia-trie/v2/internal/rlp"
 )
 
 func TestCompactAndNodePathLimitsAcceptTheirExactMaximum(t *testing.T) {

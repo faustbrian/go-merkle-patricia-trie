@@ -1,11 +1,11 @@
-module github.com/faustbrian/go-merkle-patricia-trie
+module github.com/faustbrian/go-merkle-patricia-trie/v2
 
 go 1.27.0
 
 require (
 	github.com/ethereum/go-ethereum v1.17.3
 	github.com/holiman/uint256 v1.3.2
-	golang.org/x/crypto v0.51.0
+	golang.org/x/crypto v0.56.0
 )
 
 require (
@@ -25,6 +25,6 @@ require (
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
 	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/sys v0.44.0 // indirect
+	golang.org/x/sys v0.47.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

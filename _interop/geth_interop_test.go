@@ -20,7 +20,7 @@ import (
 	"github.com/ethereum/go-ethereum/triedb"
 	"github.com/holiman/uint256"
 
-	mpt "github.com/faustbrian/go-merkle-patricia-trie"
+	mpt "github.com/faustbrian/go-merkle-patricia-trie/v2"
 )
 
 func TestGethStateAndStorageTrieProfiles(t *testing.T) {

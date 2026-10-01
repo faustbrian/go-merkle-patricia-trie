@@ -9,7 +9,7 @@ import (
 	"sort"
 	"testing"
 
-	mpt "github.com/faustbrian/go-merkle-patricia-trie"
+	mpt "github.com/faustbrian/go-merkle-patricia-trie/v2"
 )
 
 func TestSortedBuilderMatchesOrdinaryInsertion(t *testing.T) {

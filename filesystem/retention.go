@@ -13,7 +13,7 @@ import (
 	"slices"
 	"strings"
 
-	mpt "github.com/faustbrian/go-merkle-patricia-trie"
+	mpt "github.com/faustbrian/go-merkle-patricia-trie/v2"
 )
 
 type retentionID [retentionIDBytes]byte

@@ -242,8 +242,8 @@ does not produce a mutable snapshot or persist nodes.
 ## Status
 
 The documented compatibility surface has completed the delivery and hardening
-phases in [architecture](architecture.md). The module follows stable v1
-compatibility; no
+phases in [architecture](architecture.md). This main branch targets v2;
+[upgrade notes](upgrading-v2.md) describe the admission and import changes. No
 claim beyond the pinned evidence should be inferred from package presence.
 
 Licensed under Apache-2.0.

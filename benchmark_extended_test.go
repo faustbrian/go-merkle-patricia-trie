@@ -2,12 +2,35 @@ package mpt_test
 
 import (
 	"context"
+	"strconv"
 	"sync/atomic"
 	"testing"
 
-	mpt "github.com/faustbrian/go-merkle-patricia-trie"
-	"github.com/faustbrian/go-merkle-patricia-trie/memory"
+	mpt "github.com/faustbrian/go-merkle-patricia-trie/v2"
+	"github.com/faustbrian/go-merkle-patricia-trie/v2/memory"
 )
+
+// Reuse each immutable base just after the existing 32-layer compaction seam,
+// isolating path-local admission rather than measuring a full-map compaction.
+func BenchmarkSnapshotAdmissionUpdateScaling(b *testing.B) {
+	for _, size := range []int{65, 257, 1025} {
+		b.Run(strconv.Itoa(size), func(b *testing.B) {
+			trie := benchmarkPopulatedTrie(b, size)
+			ctx := context.Background()
+			key := benchmarkKey(size / 2)
+			value := []byte("admission-replacement")
+			b.ReportAllocs()
+			b.ResetTimer()
+			for b.Loop() {
+				var err error
+				benchmarkTrie, err = trie.Update(ctx, key, value)
+				if err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
+	}
+}
 
 func BenchmarkComparableRawGetOwned(b *testing.B) {
 	trie := benchmarkPopulatedTrie(b, 1024)

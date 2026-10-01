@@ -8,8 +8,20 @@ import (
 	"slices"
 	"sync"
 
-	mpt "github.com/faustbrian/go-merkle-patricia-trie"
+	mpt "github.com/faustbrian/go-merkle-patricia-trie/v2"
 )
+
+// Limits bounds the cumulative immutable nodes retained by one Store. Old
+// roots consume capacity until Prune removes their unreachable nodes.
+type Limits struct {
+	MaxStoredNodes int
+	MaxStoredBytes int
+}
+
+// DefaultLimits returns finite process-local admission bounds.
+func DefaultLimits() Limits {
+	return Limits{MaxStoredNodes: 1 << 22, MaxStoredBytes: 256 << 20}
+}
 
 // Store retains immutable encoded nodes and publishes one root at a time.
 // Concurrent reads are safe. Commits use compare-and-swap root semantics.
@@ -17,27 +29,41 @@ type Store struct {
 	mutex    sync.RWMutex
 	state    *storeState
 	retained *retainedRoots
+	limits   Limits
 }
 
 type storeState struct {
-	root  mpt.Root
-	nodes map[mpt.Root][]byte
+	root        mpt.Root
+	nodes       map[mpt.Root][]byte
+	storedBytes int
 }
 
 type retainedRoots struct {
 	leases map[*rootRetention]mpt.Root
 }
 
-// New constructs an empty store whose published root is the canonical empty
-// trie root.
+// New constructs an empty store with the canonical empty trie root and
+// DefaultLimits. A zero-value Store uses the same bounds.
 func New() *Store {
+	store, _ := NewWithLimits(DefaultLimits())
+	return store
+}
+
+// NewWithLimits constructs an empty store with explicit cumulative admission
+// limits. Both limits must be positive. Rejection leaves the root and all
+// stored snapshots unchanged; callers can prune eligible historical nodes.
+func NewWithLimits(limits Limits) (*Store, error) {
+	if limits.MaxStoredNodes <= 0 || limits.MaxStoredBytes <= 0 {
+		return nil, fmt.Errorf("%w: invalid memory admission bounds", mpt.ErrResourceLimit)
+	}
 	return &Store{
 		state: &storeState{
 			root:  mpt.EmptyRoot(),
 			nodes: make(map[mpt.Root][]byte),
 		},
 		retained: &retainedRoots{leases: make(map[*rootRetention]mpt.Root)},
-	}
+		limits:   limits,
+	}, nil
 }
 
 // Root returns the currently published root.
@@ -94,18 +120,13 @@ func (store *Store) CommitTrie(ctx context.Context, commit mpt.StoreCommit) erro
 		return err
 	}
 
-	nodes := commit.Nodes()
-	validated := make(map[mpt.Root][]byte, len(nodes))
-	for _, stored := range nodes {
-		if err := checkContext(ctx); err != nil {
-			return err
-		}
-		validated[stored.Hash()] = stored.Encoded()
-	}
-
 	store.mutex.RLock()
 	base := store.state
+	limits := store.limits
 	store.mutex.RUnlock()
+	if limits == (Limits{}) {
+		limits = DefaultLimits()
+	}
 	baseRoot := mpt.EmptyRoot()
 	var baseNodes map[mpt.Root][]byte
 	if base != nil {
@@ -114,6 +135,39 @@ func (store *Store) CommitTrie(ctx context.Context, commit mpt.StoreCommit) erro
 	}
 	if baseRoot != commit.PreviousRoot() {
 		return mpt.ErrStaleRoot
+	}
+	if commit.NodeCount() > limits.MaxStoredNodes {
+		return fmt.Errorf("%w: memory node admission bound exceeded", mpt.ErrResourceLimit)
+	}
+	nodes := commit.Nodes()
+	nextCount, nextBytes := len(baseNodes), 0
+	if base != nil {
+		nextBytes = base.storedBytes
+	}
+	for _, stored := range nodes {
+		if err := checkContext(ctx); err != nil {
+			return err
+		}
+		if _, exists := baseNodes[stored.Hash()]; exists {
+			continue
+		}
+		if nextCount == limits.MaxStoredNodes ||
+			stored.EncodedLen() > limits.MaxStoredBytes-nextBytes {
+			return fmt.Errorf("%w: memory cumulative admission bound exceeded", mpt.ErrResourceLimit)
+		}
+		nextCount++
+		nextBytes += stored.EncodedLen()
+	}
+	validated := make(map[mpt.Root][]byte, len(nodes))
+	for _, stored := range nodes {
+		if err := checkContext(ctx); err != nil {
+			return err
+		}
+		if encoded, exists := baseNodes[stored.Hash()]; exists {
+			validated[stored.Hash()] = encoded
+		} else {
+			validated[stored.Hash()] = stored.Encoded()
+		}
 	}
 
 	next := make(map[mpt.Root][]byte)
@@ -138,7 +192,7 @@ func (store *Store) CommitTrie(ctx context.Context, commit mpt.StoreCommit) erro
 	if store.state != base {
 		return mpt.ErrStaleRoot
 	}
-	store.state = &storeState{root: commit.Root(), nodes: next}
+	store.state = &storeState{root: commit.Root(), nodes: next, storedBytes: nextBytes}
 	return nil
 }
 
@@ -224,7 +278,7 @@ func (store *Store) RetainRoot(
 	if retained == nil {
 		retained = &retainedRoots{leases: make(map[*rootRetention]mpt.Root)}
 	}
-	if len(retained.leases) == limits.MaxRetentions {
+	if len(retained.leases) >= limits.MaxRetentions {
 		return nil, fmt.Errorf("%w: retained root bound exceeded", mpt.ErrResourceLimit)
 	}
 	lease := &rootRetention{store: store, root: root}
@@ -290,6 +344,13 @@ func (store *Store) Prune(
 			}
 		}
 	}
+	storedBytes := 0
+	for _, encoded := range next {
+		if err := checkContext(ctx); err != nil {
+			return mpt.PruneResult{}, err
+		}
+		storedBytes += len(encoded)
+	}
 	if err := checkContext(ctx); err != nil {
 		return mpt.PruneResult{}, err
 	}
@@ -306,7 +367,7 @@ func (store *Store) Prune(
 	if base != nil {
 		root = base.root
 	}
-	store.state = &storeState{root: root, nodes: next}
+	store.state = &storeState{root: root, nodes: next, storedBytes: storedBytes}
 	return mpt.NewPruneResult(before, len(next), removedBytes), nil
 }
 

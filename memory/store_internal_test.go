@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	mpt "github.com/faustbrian/go-merkle-patricia-trie"
+	mpt "github.com/faustbrian/go-merkle-patricia-trie/v2"
 )
 
 func TestInternalRetentionNilAndDetachedLifecycle(t *testing.T) {

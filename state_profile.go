@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/faustbrian/go-merkle-patricia-trie/internal/rlp"
+	"github.com/faustbrian/go-merkle-patricia-trie/v2/internal/rlp"
 )
 
 // EncodedAccountValue is one immutable canonical Ethereum state-account value.

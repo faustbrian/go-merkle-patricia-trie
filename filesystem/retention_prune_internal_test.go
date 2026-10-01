@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	mpt "github.com/faustbrian/go-merkle-patricia-trie"
+	mpt "github.com/faustbrian/go-merkle-patricia-trie/v2"
 )
 
 func TestRetentionEncodingIdentifiersAndTemporaryRecovery(t *testing.T) {
@@ -82,10 +82,10 @@ func TestRetentionEncodingIdentifiersAndTemporaryRecovery(t *testing.T) {
 
 	encodedID := strings.Repeat("00", retentionIDBytes)
 	for name, want := range map[string]bool{
-		"." + encodedID + ".tmp-value": true,
-		encodedID + ".tmp-value":       false,
-		"." + encodedID + ".tmp-":      false,
-		".short.tmp-value":             false,
+		"." + encodedID + ".tmp-value":                               true,
+		encodedID + ".tmp-value":                                     false,
+		"." + encodedID + ".tmp-":                                    false,
+		".short.tmp-value":                                           false,
 		"." + strings.Repeat("z", retentionIDBytes*2) + ".tmp-value": false,
 	} {
 		if got := isTemporaryRetentionFile(name); got != want {

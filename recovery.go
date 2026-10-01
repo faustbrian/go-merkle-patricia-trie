@@ -68,6 +68,10 @@ func recoverSnapshot(
 	if len(encoded) > snapshot.limits.MaxRecoveryBytes-snapshot.recoveryBytes {
 		return nil, fmt.Errorf("%w: recovery byte bound exceeded", ErrResourceLimit)
 	}
+	stats, compact, err := admitPending(ctx, snapshot, map[Root][]byte{hash: encoded}, nil, snapshot.limits)
+	if err != nil {
+		return nil, err
+	}
 
 	owned := append([]byte(nil), encoded...)
 	budget := workBudget{hashesLeft: snapshot.limits.MaxHashOperations}
@@ -90,15 +94,21 @@ func recoverSnapshot(
 	}
 
 	recoveredNodes := make(map[Root][]byte)
-	mergePersisted(recoveredNodes, snapshot.recovered)
-	recoveredNodes[hash] = append([]byte(nil), owned...)
+	if err := mergePersisted(ctx, recoveredNodes, snapshot.recovered); err != nil {
+		return nil, err
+	}
+	recoveredNodes[hash] = owned
 	recovered := *snapshot
 	recovered.pending = map[Root][]byte{hash: owned}
 	recovered.parent = snapshotPendingLayer(snapshot)
 	recovered.removed = nil
+	recovered.pendingStats = stats
 	if recovered.parent != nil &&
-		recovered.parent.depth >= maximumPendingLayerDepth {
-		compacted := materializePendingLayer(recovered.parent)
+		(compact || recovered.parent.depth >= maximumPendingLayerDepth) {
+		compacted, err := materializePendingLayerContext(ctx, recovered.parent)
+		if err != nil {
+			return nil, err
+		}
 		compacted[hash] = owned
 		recovered.pending = compacted
 		recovered.parent = nil
@@ -106,24 +116,35 @@ func recoverSnapshot(
 	recovered.recovered = recoveredNodes
 	recovered.recoveryNodes++
 	recovered.recoveryBytes += len(owned)
+	if err := checkContext(ctx); err != nil {
+		return nil, err
+	}
 	return &recovered, nil
 }
 
-func inheritRecovery(next, previous *trieSnapshot) *trieSnapshot {
-	if next.root == nil || len(previous.recovered) == 0 {
-		return next
+func inheritRecovery(ctx context.Context, next, previous *trieSnapshot) (*trieSnapshot, error) {
+	if err := checkContext(ctx); err != nil {
+		return nil, err
 	}
-	next.recovered = make(map[Root][]byte, len(previous.recovered))
+	if next.root == nil || len(previous.recovered) == 0 {
+		return next, nil
+	}
+	recovered := make(map[Root][]byte)
 	recoveryBytes := 0
-	for hash, encoded := range previous.recovered {
-		if _, reachable := lookupSnapshotPending(next, hash); reachable {
-			owned := append([]byte(nil), encoded...)
-			next.pending[hash] = owned
-			next.recovered[hash] = append([]byte(nil), owned...)
-			recoveryBytes = recoveryBytes + len(owned)
+	for hash := range previous.recovered {
+		if err := checkContext(ctx); err != nil {
+			return nil, err
+		}
+		if encoded, reachable := lookupSnapshotPending(next, hash); reachable {
+			recovered[hash] = encoded
+			recoveryBytes += len(encoded)
 		}
 	}
-	next.recoveryNodes = len(next.recovered)
+	if err := checkContext(ctx); err != nil {
+		return nil, err
+	}
+	next.recovered = recovered
+	next.recoveryNodes = len(recovered)
 	next.recoveryBytes = recoveryBytes
-	return next
+	return next, nil
 }

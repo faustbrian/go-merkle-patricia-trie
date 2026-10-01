@@ -14,7 +14,7 @@ timelines depend on severity and verification.
 
 ## Supported Versions
 
-The latest stable `v1` release receives security fixes. Older releases and the
+The latest stable major release receives security fixes. Older releases and the
 `main` branch are not supported; upgrade before reporting. At and after v1,
 incompatible exported API or documented behavior changes require a new major
 version under the [compatibility policy](COMPATIBILITY.md) and
