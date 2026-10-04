@@ -8,7 +8,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/faustbrian/go-merkle-patricia-trie/v2.svg)](https://pkg.go.dev/github.com/faustbrian/go-merkle-patricia-trie/v2)
 [![Release](https://img.shields.io/github/v/release/faustbrian/go-merkle-patricia-trie?sort=semver)](https://github.com/faustbrian/go-merkle-patricia-trie/releases)
 [![Go](https://img.shields.io/badge/go-1.27.0-00ADD8?logo=go)](https://go.dev/)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
 
 `merkle-patricia-trie` implements Ethereum's execution-layer modified Merkle
 Patricia trie. Its root package is `mpt`. It provides immutable raw and secure
@@ -107,4 +107,4 @@ gates before changing encoding, commitment, proof, or storage behavior.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+Apache-2.0. See [LICENSE](LICENSE).

@@ -41,7 +41,7 @@
       "version": "10.1.2",
       "revision": "3adf102baf8991f82feda860e0d3a3ec644d0802",
       "integrity": "sha512-dBlXpkP1ssp+AcUxsJUrY72LZuE1JQEp1AZn5mgmbBcd2Gwkpyi57q4zATlZbxrZUxp/K9UIidgqxQWcOCbo5g==",
-      "package_lock_sha256": "8b2ea70c6423660f8e525c97dd95cd3167782433da5d3a5995a475fd1da6dd81",
+      "package_lock_sha256": "8082ad8186f9f3d96e0f4be8e5c18ad4615a304aaae67cffb444c2d39a3ad6d6",
       "url": "https://github.com/ethereumjs/ethereumjs-monorepo/tree/3adf102baf8991f82feda860e0d3a3ec644d0802/packages/mpt"
     },
     {
@@ -49,7 +49,7 @@
       "version": "10.1.2",
       "revision": "3adf102baf8991f82feda860e0d3a3ec644d0802",
       "integrity": "sha512-T5Zt6C2pd02Wd88Q9A5/UX+He1Q2Y1LntHxz/038tfbUMiqby4fYSSTLEDx+TEfJqw1BsJSBY/TSu6goUzlk+w==",
-      "package_lock_sha256": "8b2ea70c6423660f8e525c97dd95cd3167782433da5d3a5995a475fd1da6dd81",
+      "package_lock_sha256": "8082ad8186f9f3d96e0f4be8e5c18ad4615a304aaae67cffb444c2d39a3ad6d6",
       "url": "https://github.com/ethereumjs/ethereumjs-monorepo/tree/3adf102baf8991f82feda860e0d3a3ec644d0802/packages/rlp"
     }
   ]

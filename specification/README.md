@@ -13,6 +13,31 @@ machine-readable evidence map.
 
 ## Upstream review history
 
+### 2026-10-04
+
+- The execution-specifications Amsterdam feed advanced from commit
+  `903b48f152c932f6e47a615f0f7f009c56f1d92b` to
+  `a87891f7e69eab1f903233c61c5514d8c94bd5d1`. The reviewed MPT source retains
+  Git blob `0dbf455ad215e7c8f25ae35cf5149e1fc957b2a1`. Upstream fork and
+  storage transitions can change execution results; callers own those
+  transitions. The covered root, encoding, and proof contracts remain
+  unchanged; no new fork profile is adopted.
+- The EIPs feed advanced from commit
+  `a9031bdc85949321a9707dd59ba44cdcba4a0eb0` to
+  `666fb5ebc712bef2179af03317fffabf15a2f563`. EIP-2718 and EIP-1186 retain
+  Git blobs `83a19b0fa865dc31b483cd97f35c417928792d7c` and
+  `1a341c3f9b8094955d386ad63b5c04e3bcc491f3`.
+- The Geth release feed advanced through v1.17.7. Its `trie/proof.go` source
+  remains byte-identical to pinned v1.17.3, with SHA-256
+  `f1092b71ebdda4f11a54a7a1c27f6ccbc0599455f2bfab68615600442564deb8`.
+  Peer pins and executed interoperability evidence remain unchanged; this
+  review does not claim execution against the latest client.
+- All pinned authority payloads remain unchanged. The proof decision corrects the
+  documented Geth proof direction; its historical digest is retained.
+  The other nine decision identities and all selected behavior are unchanged.
+  The current MPT source is distinct from the immutable pinned revision;
+  this review preserves those separate identities. Monitoring remains strict.
+
 ### 2026-09-30
 
 - All twelve monitored authority responses were fetched and checked. Immutable
