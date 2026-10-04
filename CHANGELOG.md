@@ -6,6 +6,9 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
 
 ### Changed
 
+- Update the maintained Keccak-hashing dependency `golang.org/x/crypto` to
+  v0.56.0.
+
 - Adopt the checksum-verified `go-library-tools` v1.4.0 CLI and immutable W14
   reusable workflow, and align local configuration, inventory, cohesion,
   repository, online specification, workflow, and implementation gates without
