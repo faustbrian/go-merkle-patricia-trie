@@ -4,7 +4,11 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-04
+
 ### Changed
+
+- Require Go 1.27.0 for the maintained toolchain and dependency contract.
 
 - Update the maintained Keccak-hashing dependency `golang.org/x/crypto` to
   v0.56.0.
@@ -79,7 +83,7 @@ Decision records:
 
 [Decision register](docs/specification-decisions.md)
 
-## [1.0.0] - 2026-08-26
+## [1.0.0] - 2026-08-25
 
 ### Fixed
 
@@ -107,7 +111,7 @@ Decision records:
 
 ### Documentation
 
-- Link the package README to package-owned documentation.
+- Link the package README to the repository-wide Golib documentation portal.
 
 ### Changed
 
