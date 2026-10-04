@@ -33,6 +33,14 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
 
 ### Documentation
 
+- Correct the Geth proof claim to local verification of peer-generated
+  account and storage membership and absence proofs. Keep bidirectional
+  EthereumJS coverage distinct and preserve the historical decision digest.
+- Bind EthereumJS peer provenance to the tracked package lockfile.
+
+- Record the 2026-10-04 execution, EIP, and Geth feed review without changing
+  pinned authorities, covered contracts, or peer execution claims.
+
 - Clarify that the root module uses `v<version>` tags while independently
   releasable nested modules use `<module-directory>/v<version>` tags.
 
@@ -76,7 +84,7 @@ Decision records:
 - MPT-DEC-004 sha256:3492de50569a3a40a425d17bfcf70a56c8fff7708224883881f989e6b2fff4a5
 - MPT-DEC-005 sha256:460277c8bb85a3c75b430a190a99bd6fb4f8484216df5736d2c02686ceb9fd6d
 - MPT-DEC-006 sha256:7bfbd351ec14d2498f3bed5b6519b2e4d48810bdeba7a481b695100c931ab0b6
-- MPT-DEC-007 sha256:51cd3a66aefb2d5f155b45c0f93504aabbd6317ffe4d75a53c04e52884a122f4
+- MPT-DEC-007 sha256:a5e751d688a87183e9177441de64387bf429717f42376b957dbcd66b60faf191
 - MPT-DEC-008 sha256:a77e9e6397f4953c5c4a9abddce85ca2000338515dace510a62b0a16d39676cc
 - MPT-DEC-009 sha256:cfeda2751d8c15f1b80973efd5ac5c75913440fdfeecb2f2f0a2bba156ef9967
 - MPT-DEC-010 sha256:3d5b790cc5c951e801de2d1c17369da1a01bf863a6766ca85938f5d578873b8b
