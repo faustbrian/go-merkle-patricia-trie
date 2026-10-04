@@ -59,7 +59,7 @@ func TestRangeItemByteAccountingBoundaries(t *testing.T) {
 
 func TestPendingAccountingExactReplacementAndRetention(t *testing.T) {
 	ctx := context.Background()
-	a, b := Root{1}, Root{2}
+	a, b, c := Root{1}, Root{2}, Root{3}
 	previous := &trieSnapshot{pending: map[Root][]byte{a: {1, 2}}, pendingStats: pendingAccounting{liveNodes: 1, liveBytes: 2, retainedNodes: 1, retainedBytes: 2}}
 	for _, tc := range []struct {
 		name           string
@@ -70,6 +70,7 @@ func TestPendingAccountingExactReplacementAndRetention(t *testing.T) {
 		compact, limit bool
 	}{
 		{"add exact", map[Root][]byte{b: {3}}, nil, 2, 3, pendingAccounting{2, 3, 2, 3}, false, false},
+		{"multiple additions", map[Root][]byte{b: {3}, c: {4, 5, 6}}, nil, 4, 10, pendingAccounting{3, 6, 3, 6}, false, false},
 		{"replace spare", map[Root][]byte{a: {3, 4, 5}}, nil, 3, 8, pendingAccounting{1, 3, 2, 5}, false, false},
 		{"replace byte pressure", map[Root][]byte{a: {3, 4, 5}}, nil, 3, 3, pendingAccounting{1, 3, 1, 3}, true, false},
 		{"replace node pressure", map[Root][]byte{a: {3}}, nil, 1, 8, pendingAccounting{1, 1, 1, 1}, true, false},
