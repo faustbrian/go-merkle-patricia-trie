@@ -351,7 +351,7 @@
         "Ignore surplus nodes.",
         "Require a deterministic minimal ordered witness bound to every claim and profile."
       ],
-      "peer_behavior": "Pinned Geth and EthereumJS proofs verify bidirectionally for the covered raw, account, storage, membership, and absence cases.",
+      "peer_behavior": "Pinned Geth-generated account and storage membership and absence proofs verify locally. Pinned EthereumJS proofs verify bidirectionally for the covered account and storage membership and absence cases.",
       "selected_behavior": "Bind root, key path, expected value or absence, and profile; require canonical ordered nodes; deduplicate shared multi-proof nodes; reject missing, duplicate, reordered, surplus, malformed, or conflicting claims; and keep EIP-1186 JSON transport outside the package.",
       "rationale": "Exact claim and witness binding prevents proof smuggling while separating the Go proof model from JSON-RPC transport claims.",
       "security_consequences": "Strict witness validation prevents ambiguous, surplus, or conflicting proof material.",
