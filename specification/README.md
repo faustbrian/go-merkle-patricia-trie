@@ -13,6 +13,21 @@ machine-readable evidence map.
 
 ## Upstream review history
 
+### 2026-10-06
+
+- Reviewed only the EIPs change feed advancement from
+  `666fb5ebc712bef2179af03317fffabf15a2f563` to
+  `69075f1b54fc4a116b41f75461a9868755a83e41`. Its five commits change
+  EIP-5069, EIP-7495, EIP-7906, EIP-8081, and EIP-8148, not EIP-2718 or
+  EIP-1186. The two declared normative leaves retain their recorded bytes
+  and Git blobs `83a19b0fa865dc31b483cd97f35c417928792d7c` and
+  `1a341c3f9b8094955d386ad63b5c04e3bcc491f3`.
+- Updated only the `eip-changes` feed digest to acknowledge this reviewed
+  signal. Pinned normative revision `c55786f4242e5324afd14c6bca890a369a771d7f`,
+  decisions, fixtures, peer pins, and selected behavior remain unchanged.
+  This is not a fresh review of all twelve authorities; the existing review
+  date and 30-day policy remain intact. Monitoring still fails on later drift.
+
 ### 2026-10-04
 
 - The execution-specifications Amsterdam feed advanced from commit
