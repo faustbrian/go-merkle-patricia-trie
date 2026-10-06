@@ -75,7 +75,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: faustbrian/go-library-tools
-          ref: c799f67c5f4ac074e24a0172fb41a96cce9dad8e
+          ref: dbce31aab4f15b3440e0559d3e2bad8912b6e567
           persist-credentials: false
           path: tooling
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
@@ -105,7 +105,7 @@ jobs:
         working-directory: tooling
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = c799f67c5f4ac074e24a0172fb41a96cce9dad8e
+          test "$(git rev-parse HEAD)" = dbce31aab4f15b3440e0559d3e2bad8912b6e567
           go build -trimpath -buildvcs=false -o "${QUALIFICATION_TASK}/golib" ./cmd/golib
           test "$("${QUALIFICATION_TASK}/golib" --version)" = dev
       - name: Qualify the complete root release contract
