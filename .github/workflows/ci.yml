@@ -51,6 +51,7 @@ jobs:
     name: Root release qualification
     permissions:
       contents: read
+      actions: read
     if: github.event_name == 'workflow_dispatch' && inputs.root_release_qualification
     needs: [release-inputs, ci]
     runs-on: ubuntu-24.04
@@ -101,6 +102,35 @@ jobs:
             echo "NPM_CONFIG_CACHE=${task}/npm"
           } >>"${GITHUB_ENV}"
           mkdir -p "${task}/cache" "${task}/mod" "${task}/tmp" "${task}/lint" "${task}/xdg" "${task}/npm"
+      - name: Restore authentic unchanged mutation checkpoints
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          repository=faustbrian/go-merkle-patricia-trie
+          producer=33dbb36c3c5d85a2ffd069663b0740a2be73b3ed
+          digest=db07cc443f7d57ae371e1b5af923a566fe8d21cbc018b72c282edaafc391f5e5
+          test "$(gh api "repos/${repository}/actions/runs/37396681653" \
+            --jq '.head_sha')" = "${producer}"
+          test "$(gh api "repos/${repository}/actions/artifacts/11384094087" \
+            --jq 'select(.name == "root-release-qualification" and .expired == false and .workflow_run.id == 37396681653) | .digest')" = "sha256:${digest}"
+          archive="${QUALIFICATION_TASK}/mutation-checkpoints.zip"
+          gh api "repos/${repository}/actions/artifacts/11384094087/zip" >"${archive}"
+          printf '%s  %s\n' "${digest}" "${archive}" | sha256sum --check --strict
+          mkdir -p source/.verification/by-input/mutation source/.verification/mutation/reports
+          for input in \
+            278b5172661a988726f61465b8f56147f65a1a3fdc595400c4344b323010cddd \
+            c994157c159691b7a416b8c641fe9be4716579b3c9692e56718db529d82a3b8c \
+            bc95fba81ce172f8d8617dd272bcbc897cb68c02136845e365884e456008e962 \
+            1406c440b0c18d6da7b9a20a81143088bd7a483d423c01cf64a3eb282a5efd83
+          do
+            for path in "by-input/mutation/${input}.json" "mutation/reports/${input}.json"
+            do
+              unzip -p "${archive}" "${path}" >"source/.verification/${path}"
+              test -s "source/.verification/${path}"
+            done
+          done
+          rm "${archive}"
       - name: Build exact source tooling without a release identity
         working-directory: tooling
         run: |
