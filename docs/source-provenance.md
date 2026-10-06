@@ -64,7 +64,10 @@ membership and absence. EthereumJS independently verifies the package's
 generated account and storage proofs over the same secure paths.
 
 Selected Geth v1.17.3 transition-tool outputs are imported byte-for-byte with
-their LGPL-3.0 license and per-file checksums. Their exact receipt values
+their GPL-3.0 license and per-file checksums. These fixtures originate under
+upstream `cmd/evm`, whose GPL v3 scope differs from the LGPL v3 library scope.
+Their upstream notice remains in `testdata/go-ethereum/COPYING`; the fixture
+license is separate from this library's Apache-2.0 license. Their exact values
 reconstruct legacy, type-2, type-3, and type-4 receipt roots. Type-1 receipt
 roots remain covered dynamically by both pinned client oracles.
 
@@ -96,6 +99,6 @@ tests covering raw roots, secure roots, ordered mutations, hex byte inputs,
 and neighbor iteration behavior.
 
 The selected Geth transition-tool corpus is imported byte-for-byte under
-`testdata/go-ethereum`. Its manifest records the pinned revision, LGPL-3.0
+`testdata/go-ethereum`. Its manifest records the pinned revision, GPL-3.0
 license, per-file SHA-256 values, update procedure, fork applicability, exact
 receipt-root coverage, and the explicit official-fixture limitation.
