@@ -3,7 +3,10 @@
 - Source: `ethereum/go-ethereum`
 - Version: `v1.17.3`
 - Revision: `117e067f0f0bae1a17082321f224dedb6765b10f`
-- License: LGPL-3.0 (`COPYING`, copied byte-for-byte from the pinned revision)
+- License: GPL-3.0 (`COPYING`, copied byte-for-byte from the pinned revision)
+- License scope: these files originate in `cmd/evm`; the pinned upstream
+  [license declaration](https://github.com/ethereum/go-ethereum/blob/117e067f0f0bae1a17082321f224dedb6765b10f/README.md#license)
+  assigns GPL v3 to `cmd`, distinct from the LGPL v3 library scope.
 - Update: `./scripts/update-geth-receipt-fixtures.sh`
 - Applicability: Geth transition-tool receipt outputs for legacy, type-2,
   type-3, and type-4 execution profiles.
@@ -18,6 +21,8 @@ Imported files remain byte-identical to the pinned revision:
 | `cmd/evm/testdata/33/exp.json` | `8aa6a6530afca88899c105908e032387c51a2fa6019f4002726320a7c97270f4` | Type-4 receipt root |
 
 These are maintained-client fixtures, not official execution-spec fixtures.
+They retain their upstream license separately from the Apache-2.0 library;
+they are test data, not imported runtime code.
 Type-1 receipt roots remain covered by the pinned Geth and EthereumJS dynamic
 interoperability tests. The official execution-spec-tests blockchain fixtures
 do not expose receipt values and therefore cannot reconstruct receipt tries.
