@@ -14,7 +14,7 @@ func RLPIndexKey(index uint64) []byte {
 
 	length := (bits.Len64(index) + 7) / 8
 	encoded := make([]byte, length+1)
-	encoded[0] = 0x80 + byte(length)
+	encoded[0] = 0x80 + byte(length) // #nosec G115 -- bits.Len64 is at most 64, so the rounded byte length is at most 8 and the prefix at most 0x88.
 	for position := len(encoded) - 1; position > 0; position-- {
 		encoded[position] = byte(index)
 		index >>= 8

@@ -25,6 +25,11 @@ type Limits struct {
 	MaxProofBytes      int
 	MaxRecoveryNodes   int
 	MaxRecoveryBytes   int
+	// MaxPendingNodes and MaxPendingBytes bound each snapshot's encoded pending
+	// chain (including stale ancestry) and materialized node/path/value cache.
+	// Cache admission also uses MaxEncodingNodes and MaxTraversalDepth.
+	MaxPendingNodes int
+	MaxPendingBytes int
 }
 
 // DefaultLimits returns conservative limits suitable for ordinary raw and
@@ -47,6 +52,8 @@ func DefaultLimits() Limits {
 		MaxProofBytes:      16 << 20,
 		MaxRecoveryNodes:   1024,
 		MaxRecoveryBytes:   16 << 20,
+		MaxPendingNodes:    1 << 20,
+		MaxPendingBytes:    256 << 20,
 	}
 }
 
@@ -61,6 +68,7 @@ type trieSnapshot struct {
 	parent       *pendingLayer
 	removed      map[Root]struct{}
 	materialized bool
+	pendingStats pendingAccounting
 
 	recovered     map[Root][]byte
 	recoveryNodes int
@@ -316,7 +324,7 @@ func updateSnapshot(
 	if err != nil {
 		return nil, err
 	}
-	return inheritRecovery(finished, snapshot), nil
+	return inheritRecovery(ctx, finished, snapshot)
 }
 
 func deleteSnapshot(
@@ -373,7 +381,7 @@ func deleteSnapshot(
 	if err != nil {
 		return nil, err
 	}
-	return inheritRecovery(finished, snapshot), nil
+	return inheritRecovery(ctx, finished, snapshot)
 }
 
 func finishSnapshot(
@@ -441,11 +449,24 @@ func finishSnapshotWithPending(
 			materialized: materialized,
 		}, nil
 	}
+	if materialized {
+		footprint := decodedNodeFootprint(readRoot)
+		if !footprint.complete {
+			return nil, fmt.Errorf("%w: invalid materialized node", ErrMalformedNode)
+		}
+		maximum := int(^uint(0) >> 1)
+		if footprint.nodes > min(limits.MaxPendingNodes, limits.MaxEncodingNodes) ||
+			footprint.bytes > limits.MaxPendingBytes || footprint.depth > limits.MaxTraversalDepth ||
+			footprint.nodes == maximum || footprint.bytes == maximum || footprint.depth == maximum {
+			return nil, fmt.Errorf("%w: materialized snapshot bound exceeded", ErrResourceLimit)
+		}
+	}
 	encoded, pending, err := encodeNodeBounded(
 		ctx,
 		root,
 		limits.MaxEncodingNodes,
 		budget,
+		limits,
 	)
 	if err != nil {
 		return nil, err
@@ -461,25 +482,42 @@ func finishSnapshotWithPending(
 	if err != nil {
 		return nil, err
 	}
-	added := make(map[Root][]byte)
-	mergePersistedReferences(added, pending)
-	added[hash] = append([]byte(nil), encoded...)
+	added := pending
+	added[hash] = encoded
 	parent, removed := nextPendingLayer(previous, resolved)
-	if parent != nil && parent.depth >= maximumPendingLayerDepth {
-		compacted := materializePendingLayer(parent)
-		for stale := range removed {
-			delete(compacted, stale)
+	stats, compact, err := admitPending(ctx, previous, added, removed, limits)
+	if err != nil && !errors.Is(err, ErrResourceLimit) {
+		return nil, err
+	}
+	if err != nil || (parent != nil && (compact || parent.depth >= maximumPendingLayerDepth)) {
+		compacted, err := materializePendingLayerContext(ctx, parent)
+		if err != nil {
+			return nil, err
 		}
-		mergePersistedReferences(compacted, added)
+		if err := mergePendingContext(ctx, compacted, removed, added); err != nil {
+			return nil, err
+		}
+		compacted, err = retainReferencedPending(ctx, frozen, hash, compacted, limits)
+		if err != nil {
+			return nil, err
+		}
+		stats, _, err = admitPending(ctx, nil, compacted, nil, limits)
+		if err != nil {
+			return nil, err
+		}
 		added = compacted
 		parent = nil
 		removed = nil
+	}
+	if err := checkContext(ctx); err != nil {
+		return nil, err
 	}
 	return &trieSnapshot{
 		root: frozen, readRoot: readRoot, hash: hash, limits: limits,
 		base: base, reader: reader,
 		pending: added, parent: parent, removed: removed,
 		materialized: materialized,
+		pendingStats: stats,
 	}, nil
 }
 
@@ -525,7 +563,9 @@ func validateTrieLimits(limits Limits) error {
 		limits.MaxProofNodes <= 0 ||
 		limits.MaxProofBytes <= 0 ||
 		limits.MaxRecoveryNodes <= 0 ||
-		limits.MaxRecoveryBytes <= 0 {
+		limits.MaxRecoveryBytes <= 0 ||
+		limits.MaxPendingNodes <= 0 ||
+		limits.MaxPendingBytes <= 0 {
 		return fmt.Errorf("%w: invalid trie limits", ErrResourceLimit)
 	}
 	return nil
@@ -691,6 +731,7 @@ func insertNode(
 			return nil, err
 		}
 		resolved := &extensionNode{path: current.path, child: child}
+		resolved.footprint = decodedNodeFootprint(resolved)
 		return insertExtension(resolved, path, value, depth, state)
 	case *branchNode:
 		children := current.children
@@ -1045,13 +1086,16 @@ func commitSnapshot(
 		len(snapshot.recovered) == 0 {
 		return snapshot, nil
 	}
-	commit := newStoreCommit(
-		snapshot.base,
-		snapshot.hash,
-		materializeSnapshotPending(snapshot),
-	)
+	pending, err := materializeSnapshotPendingContext(ctx, snapshot)
+	if err != nil {
+		return nil, err
+	}
+	commit, err := newStoreCommitContext(ctx, snapshot.base, snapshot.hash, pending)
+	if err != nil {
+		return nil, err
+	}
 	if err := store.CommitTrie(ctx, commit); err != nil {
-		return nil, fmt.Errorf("%w: %w", ErrStorageCommit, err)
+		return nil, &storageError{category: ErrStorageCommit, cause: err}
 	}
 	return &trieSnapshot{
 		root: snapshot.root, readRoot: snapshot.readRoot,
@@ -1112,8 +1156,14 @@ func (state *traversalState) resolveEncoded(
 			if errors.Is(err, ErrMissingNode) {
 				return nil, nil, &MissingNodeError{Hash: hash, Cause: err}
 			}
-			return nil, nil, fmt.Errorf("%w: %w", ErrStorageRead, err)
+			return nil, nil, &storageError{category: ErrStorageRead, cause: err}
 		}
+	}
+	if err := checkContext(state.ctx); err != nil {
+		return nil, nil, err
+	}
+	if err := checkEncodedNodeBytes(encoded); err != nil {
+		return nil, nil, err
 	}
 	encoded = append([]byte(nil), encoded...)
 	actual, err := state.budget.hash(encoded)
@@ -1138,13 +1188,74 @@ func (state *traversalState) resolveEncoded(
 	return resolved, append([]byte(nil), encoded...), nil
 }
 
-func mergePersistedReferences(target, source map[Root][]byte) {
-	for root, encoded := range source {
-		target[root] = encoded
-	}
+const maximumPendingLayerDepth = 32
+
+type pendingAccounting struct {
+	liveNodes     int
+	liveBytes     int
+	retainedNodes int
+	retainedBytes int
 }
 
-const maximumPendingLayerDepth = 32
+// admitPending counts the live union without materializing or copying its
+// encoded payloads. Pressure compacts stale ancestry before retaining another
+// layer, so the physical pending chain obeys the same configured ceilings.
+func admitPending(ctx context.Context, previous *trieSnapshot, added map[Root][]byte, removed map[Root]struct{}, limits Limits) (pendingAccounting, bool, error) {
+	stats := pendingAccounting{}
+	if previous != nil {
+		stats = previous.pendingStats
+	}
+	for hash := range removed {
+		if err := checkContext(ctx); err != nil {
+			return pendingAccounting{}, false, err
+		}
+		if encoded, exists := lookupSnapshotPending(previous, hash); exists {
+			stats.liveNodes--
+			stats.liveBytes -= len(encoded)
+		}
+	}
+	// Subtract replacements as a separate pass so map iteration order cannot
+	// reject a fitting union before later duplicate entries release capacity.
+	for hash := range added {
+		if err := checkContext(ctx); err != nil {
+			return pendingAccounting{}, false, err
+		}
+		_, removedHere := removed[hash]
+		old, exists := lookupSnapshotPending(previous, hash)
+		if exists && !removedHere {
+			stats.liveNodes--
+			stats.liveBytes -= len(old)
+		}
+	}
+	addedBytes := 0
+	for _, encoded := range added {
+		if err := checkContext(ctx); err != nil {
+			return pendingAccounting{}, false, err
+		}
+		if stats.liveNodes >= limits.MaxPendingNodes ||
+			len(encoded) > limits.MaxPendingBytes-stats.liveBytes {
+			return pendingAccounting{}, false, fmt.Errorf("%w: cumulative pending node bound exceeded", ErrResourceLimit)
+		}
+		stats.liveNodes++
+		stats.liveBytes += len(encoded)
+		// Every added node is part of the bounded live union. Summing its
+		// bytes therefore cannot overflow the validated live-byte ceiling.
+		addedBytes += len(encoded)
+	}
+	compact := len(added) > limits.MaxPendingNodes-stats.retainedNodes ||
+		addedBytes > limits.MaxPendingBytes-stats.retainedBytes
+	if layer := snapshotPendingLayer(previous); layer != nil &&
+		layer.depth >= maximumPendingLayerDepth {
+		compact = true
+	}
+	if compact {
+		stats.retainedNodes, stats.retainedBytes = stats.liveNodes, stats.liveBytes
+	} else {
+		stats.retainedNodes += len(added)
+		stats.retainedBytes += addedBytes
+	}
+	return stats, compact, nil
+}
 
 type pendingLayer struct {
 	added   map[Root][]byte
@@ -1163,10 +1274,67 @@ func nextPendingLayer(
 	parent := snapshotPendingLayer(previous)
 	removed := make(map[Root]struct{})
 	removed[previous.hash] = struct{}{}
-	for hash := range resolved {
-		removed[hash] = struct{}{}
-	}
+	// Resolving a hash along one changed path does not establish that every
+	// reference to it disappeared. Keep those immutable encodings until the
+	// existing bounded compaction seam can prove they are no longer needed.
 	return parent, removed
+}
+
+// retainReferencedPending reclaims encodings only at pending compaction seams.
+// An unresolved backing-store frontier cannot prove which owned descendants
+// it references, so its presence conservatively retains the bounded union.
+func retainReferencedPending(ctx context.Context, root node, hash Root, pending map[Root][]byte, limits Limits) (map[Root][]byte, error) {
+	state := traversalState{ctx: ctx, maxDepth: limits.MaxTraversalDepth, nodesLeft: limits.MaxTraversalNodes}
+	retained := make(map[Root][]byte)
+	if encoded, exists := pending[hash]; exists {
+		retained[hash] = encoded
+	}
+	unknown := false
+	var visit func(node, int) error
+	visit = func(current node, depth int) error {
+		if err := state.visit(depth); err != nil {
+			return err
+		}
+		switch current := current.(type) {
+		case hashNode:
+			hash := Root(current)
+			if _, seen := retained[hash]; seen {
+				return nil
+			}
+			encoded, exists := pending[hash]
+			if !exists {
+				unknown = true
+				return nil
+			}
+			retained[hash] = encoded
+			decoded, err := decodeNode(encoded)
+			if err != nil {
+				return err
+			}
+			return visit(decoded, depth)
+		case *extensionNode:
+			return visit(current.child, depth+1)
+		case *branchNode:
+			for _, child := range current.children {
+				if child != nil {
+					if err := visit(child, depth+1); err != nil {
+						return err
+					}
+				}
+			}
+		}
+		return nil
+	}
+	if err := visit(root, 0); err != nil {
+		return nil, err
+	}
+	if err := checkContext(ctx); err != nil {
+		return nil, err
+	}
+	if unknown {
+		return pending, nil
+	}
+	return retained, nil
 }
 
 func snapshotPendingLayer(snapshot *trieSnapshot) *pendingLayer {
@@ -1225,33 +1393,66 @@ func lookupPending(
 }
 
 func materializeSnapshotPending(snapshot *trieSnapshot) map[Root][]byte {
-	if snapshot == nil {
-		return make(map[Root][]byte)
-	}
-	materialized := materializePendingLayer(snapshot.parent)
-	for hash := range snapshot.removed {
-		delete(materialized, hash)
-	}
-	mergePersistedReferences(materialized, snapshot.pending)
+	materialized, _ := materializeSnapshotPendingContext(context.Background(), snapshot)
 	return materialized
 }
 
-func materializePendingLayer(layer *pendingLayer) map[Root][]byte {
+// Context-free materialization is reserved for private owned fixtures;
+// production preparation observes cancellation before every retained entry.
+func materializeSnapshotPendingContext(ctx context.Context, snapshot *trieSnapshot) (map[Root][]byte, error) {
+	if err := checkContext(ctx); err != nil {
+		return nil, err
+	}
+	if snapshot == nil {
+		return make(map[Root][]byte), nil
+	}
+	materialized, err := materializePendingLayerContext(ctx, snapshot.parent)
+	if err != nil {
+		return nil, err
+	}
+	if err := mergePendingContext(ctx, materialized, snapshot.removed, snapshot.pending); err != nil {
+		return nil, err
+	}
+	return materialized, nil
+}
+
+func materializePendingLayerContext(ctx context.Context, layer *pendingLayer) (map[Root][]byte, error) {
+	if err := checkContext(ctx); err != nil {
+		return nil, err
+	}
 	if layer == nil {
-		return make(map[Root][]byte)
+		return make(map[Root][]byte), nil
 	}
 	layers := make([]*pendingLayer, 0, layer.depth)
 	for current := layer; current != nil; current = current.parent {
+		if err := checkContext(ctx); err != nil {
+			return nil, err
+		}
 		layers = append(layers, current)
 	}
 	materialized := make(map[Root][]byte)
 	for index := len(layers) - 1; index >= 0; index-- {
-		for hash := range layers[index].removed {
-			delete(materialized, hash)
+		if err := mergePendingContext(ctx, materialized, layers[index].removed, layers[index].added); err != nil {
+			return nil, err
 		}
-		mergePersistedReferences(materialized, layers[index].added)
 	}
-	return materialized
+	return materialized, nil
+}
+
+func mergePendingContext(ctx context.Context, target map[Root][]byte, removed map[Root]struct{}, added map[Root][]byte) error {
+	for hash := range removed {
+		if err := checkContext(ctx); err != nil {
+			return err
+		}
+		delete(target, hash)
+	}
+	for hash, encoded := range added {
+		if err := checkContext(ctx); err != nil {
+			return err
+		}
+		target[hash] = encoded
+	}
+	return checkContext(ctx)
 }
 
 func (state *traversalState) extensionChild(child node) (node, error) {

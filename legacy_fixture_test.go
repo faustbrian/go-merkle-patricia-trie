@@ -13,7 +13,7 @@ import (
 	"strings"
 	"testing"
 
-	mpt "github.com/faustbrian/go-merkle-patricia-trie"
+	mpt "github.com/faustbrian/go-merkle-patricia-trie/v2"
 )
 
 const legacyFixtureDirectory = "testdata/ethereum-tests/TrieTests"

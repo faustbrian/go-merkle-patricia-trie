@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/faustbrian/go-merkle-patricia-trie/internal/rlp"
+	"github.com/faustbrian/go-merkle-patricia-trie/v2/internal/rlp"
 )
 
 // SortedBuilder incrementally calculates a raw-trie root from strictly sorted

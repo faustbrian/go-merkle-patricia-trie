@@ -188,7 +188,10 @@ func TestRecoveryInheritanceRetainsOnlyReachableNodesAndExactLimits(t *testing.T
 			secondHash: secondEncoded,
 		},
 	}
-	inherited := inheritRecovery(next, previous)
+	inherited, err := inheritRecovery(context.Background(), next, previous)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if inherited != next {
 		t.Fatal("inheritRecovery() replaced the next snapshot")
 	}
@@ -220,12 +223,12 @@ func TestRecoveryInheritanceRetainsOnlyReachableNodesAndExactLimits(t *testing.T
 	unchanged := &trieSnapshot{
 		root: &leafNode{path: nil, value: []byte("value")},
 	}
-	if got := inheritRecovery(unchanged, emptyRecovery); got != unchanged ||
+	if got, err := inheritRecovery(context.Background(), unchanged, emptyRecovery); err != nil || got != unchanged ||
 		got.recovered != nil {
 		t.Fatal("empty recovery inheritance changed the snapshot")
 	}
 	emptyRoot := &trieSnapshot{}
-	if got := inheritRecovery(emptyRoot, previous); got != emptyRoot ||
+	if got, err := inheritRecovery(context.Background(), emptyRoot, previous); err != nil || got != emptyRoot ||
 		got.recovered != nil {
 		t.Fatal("empty-root recovery inheritance changed the snapshot")
 	}
@@ -323,8 +326,8 @@ func TestOrdinaryUpdatesDoNotRetainSupersededCommitNodes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Update(replace 10) error = %v", err)
 	}
-	if _, retained := materializeSnapshotPending(trie.snapshot)[Root(superseded)]; retained {
-		t.Fatalf("replacement retained superseded child %x", Root(superseded))
+	if _, retained := materializeSnapshotPending(trie.snapshot)[Root(superseded)]; !retained {
+		t.Fatalf("replacement discarded a leaf still referenced by its sibling %x", Root(superseded))
 	}
 }
 

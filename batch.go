@@ -175,5 +175,5 @@ func applyBatch(
 	if err != nil {
 		return nil, err
 	}
-	return inheritRecovery(finished, snapshot), nil
+	return inheritRecovery(ctx, finished, snapshot)
 }

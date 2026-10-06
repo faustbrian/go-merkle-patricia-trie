@@ -5,14 +5,14 @@
   "modules": [
     {
       "directory": ".",
-      "module_path": "github.com/faustbrian/go-merkle-patricia-trie",
+      "module_path": "github.com/faustbrian/go-merkle-patricia-trie/v2",
       "go_version": "1.27.0",
       "packages": [
         {
           "module_directory": ".",
           "directory": ".",
           "name": "mpt",
-          "import_path": "github.com/faustbrian/go-merkle-patricia-trie",
+          "import_path": "github.com/faustbrian/go-merkle-patricia-trie/v2",
           "kind": "public",
           "production": true,
           "executable": true,
@@ -24,7 +24,7 @@
           "module_directory": ".",
           "directory": "filesystem",
           "name": "filesystem",
-          "import_path": "github.com/faustbrian/go-merkle-patricia-trie/filesystem",
+          "import_path": "github.com/faustbrian/go-merkle-patricia-trie/v2/filesystem",
           "kind": "public",
           "production": true,
           "executable": true,
@@ -36,7 +36,7 @@
           "module_directory": ".",
           "directory": "internal/rlp",
           "name": "rlp",
-          "import_path": "github.com/faustbrian/go-merkle-patricia-trie/internal/rlp",
+          "import_path": "github.com/faustbrian/go-merkle-patricia-trie/v2/internal/rlp",
           "kind": "internal",
           "production": true,
           "executable": true,
@@ -48,7 +48,7 @@
           "module_directory": ".",
           "directory": "memory",
           "name": "memory",
-          "import_path": "github.com/faustbrian/go-merkle-patricia-trie/memory",
+          "import_path": "github.com/faustbrian/go-merkle-patricia-trie/v2/memory",
           "kind": "public",
           "production": true,
           "executable": true,
@@ -65,7 +65,7 @@
       "family_label": "Domain Utilities",
       "family_description": "Domain-specific immutable values, algorithms, parsers, proofs, and calculations.",
       "family_order": 8,
-      "version": "1.1.0",
+      "version": "2.0.0",
       "tag_prefix": "v",
       "owned_dependencies": [],
       "reverse_owned_dependencies": [],
@@ -125,12 +125,12 @@
         ],
         "public_package_identifier": "mpt",
         "primary_entry_packages": [
-          "github.com/faustbrian/go-merkle-patricia-trie"
+          "github.com/faustbrian/go-merkle-patricia-trie/v2"
         ],
         "package_selection": {
-          "github.com/faustbrian/go-merkle-patricia-trie": "Use mpt for immutable trie construction, updates, roots, proofs, retention, pruning, and recovery.",
-          "github.com/faustbrian/go-merkle-patricia-trie/filesystem": "Use filesystem when trie nodes require caller-closed durable local storage.",
-          "github.com/faustbrian/go-merkle-patricia-trie/memory": "Use memory for process-local node storage without a resource lifecycle."
+          "github.com/faustbrian/go-merkle-patricia-trie/v2": "Use mpt for immutable trie construction, updates, roots, proofs, retention, pruning, and recovery.",
+          "github.com/faustbrian/go-merkle-patricia-trie/v2/filesystem": "Use filesystem when trie nodes require caller-closed durable local storage.",
+          "github.com/faustbrian/go-merkle-patricia-trie/v2/memory": "Use memory for process-local node storage without a resource lifecycle."
         },
         "lifecycle_status": "active",
         "maturity": "stable",
@@ -155,8 +155,8 @@
         "optional_owned_dependencies": [],
         "adapters": [],
         "companions": [
-          "github.com/faustbrian/go-merkle-patricia-trie/filesystem",
-          "github.com/faustbrian/go-merkle-patricia-trie/memory"
+          "github.com/faustbrian/go-merkle-patricia-trie/v2/filesystem",
+          "github.com/faustbrian/go-merkle-patricia-trie/v2/memory"
         ],
         "supported_go": {
           "minimum": "1.27.0",
@@ -187,7 +187,7 @@
           "examples": "example_test.go",
           "faq": "docs/adoption.md",
           "changelog": "CHANGELOG.md",
-          "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-merkle-patricia-trie",
+          "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-merkle-patricia-trie/v2",
           "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/README.md"
         },
         "known_good_compatibility_sets": [],

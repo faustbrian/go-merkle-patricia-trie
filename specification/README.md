@@ -13,6 +13,21 @@ machine-readable evidence map.
 
 ## Upstream review history
 
+### 2026-10-06
+
+- Reviewed only the EIPs change feed advancement from
+  `666fb5ebc712bef2179af03317fffabf15a2f563` to
+  `69075f1b54fc4a116b41f75461a9868755a83e41`. Its five commits change
+  EIP-5069, EIP-7495, EIP-7906, EIP-8081, and EIP-8148, not EIP-2718 or
+  EIP-1186. The two declared normative leaves retain their recorded bytes
+  and Git blobs `83a19b0fa865dc31b483cd97f35c417928792d7c` and
+  `1a341c3f9b8094955d386ad63b5c04e3bcc491f3`.
+- Updated only the `eip-changes` feed digest to acknowledge this reviewed
+  signal. Pinned normative revision `c55786f4242e5324afd14c6bca890a369a771d7f`,
+  decisions, fixtures, peer pins, and selected behavior remain unchanged.
+  This is not a fresh review of all twelve authorities; the existing review
+  date and 30-day policy remain intact. Monitoring still fails on later drift.
+
 ### 2026-10-04
 
 - The execution-specifications Amsterdam feed advanced from commit
@@ -37,6 +52,40 @@ machine-readable evidence map.
   The other nine decision identities and all selected behavior are unchanged.
   The current MPT source is distinct from the immutable pinned revision;
   this review preserves those separate identities. Monitoring remains strict.
+
+### 2026-09-30
+
+- All twelve monitored authority responses were fetched and checked. Immutable
+  normative sources, the Yellow Paper change feed, and the Go release feed
+  retain their recorded SHA-256 digests. The 30-day review interval is unchanged.
+- The execution-specifications feed now ends at
+  `847cdbdb7e0130132dbbc987ffa3a9d31ca3ade5`; its SHA-256 changed from
+  `311471dca9b1d8a4c7ceb667d53340b800efdf0cfdb762a8a9584fd6de671a53`
+  to `9905bddafe50bce0b82df411b98d2bed866bcc5ea28c6f460085c0667c2e5c8b`.
+  The exact MPT source retains blob
+  `0dbf455ad215e7c8f25ae35cf5149e1fc957b2a1`.
+- The EIPs feed now ends at `66daa41124581e4e839e89d71eb06b6cd4b1f9b8`;
+  its SHA-256 changed from
+  `2525eea7c1153152a1278011cb4b02b43ba3e8782ea4d49274f40f46550d3cc3`
+  to `be8e6dea57dff6ef27006628b595e1d488e34732e6fa914c6ab7cbb60631fbf6`.
+  EIP-2718 and EIP-1186 retain blobs
+  `83a19b0fa865dc31b483cd97f35c417928792d7c` and
+  `1a341c3f9b8094955d386ad63b5c04e3bcc491f3`.
+- The final same-day recheck observed one further EIPs feed entry at
+  `52593e4aa929247bae05463f190b9d00699e9395`. The feed SHA-256 moved from
+  `be8e6dea57dff6ef27006628b595e1d488e34732e6fa914c6ab7cbb60631fbf6`
+  to `fbc11507122f66224e4fef8f25cd9471f179af8c414bbd730b113a92be9969f3`.
+  Both covered EIPs retain their exact source digests and Git blobs above;
+  normative pins and selected behavior remain unchanged.
+- The Geth release feed includes v1.17.7 at
+  `3d858f858a458effb2a563788aedf1fe65e1f0d3`; its SHA-256 changed from
+  `196f09de85c8a92c65d0c648db0e11553294815e76ad77aeffa5120ad6f6f552`
+  to `b7409d7179b3a4ec85dec82b45245f2a8fbfa16e50a9d10cfc1802e31b7b8ae1`.
+  Its `trie/proof.go` is byte-identical to the pinned v1.17.3 proof source
+  (`f1092b71ebdda4f11a54a7a1c27f6ccbc0599455f2bfab68615600442564deb8`).
+  The maintained-peer oracle remains v1.17.3; no normative pin, selected
+  specification decision, wire encoding, or runtime rule changes from this
+  authority review.
 
 ### 2026-09-06
 

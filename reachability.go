@@ -193,12 +193,18 @@ func (state *reachabilityState) collectHash(hash Root, depth int) (node, error) 
 		if errors.Is(err, ErrMissingNode) {
 			return nil, &MissingNodeError{Hash: hash, Cause: err}
 		}
-		return nil, fmt.Errorf("%w: %w", ErrStorageRead, err)
+		return nil, &storageError{category: ErrStorageRead, cause: err}
 	}
-	encoded = append([]byte(nil), encoded...)
+	if err := checkContext(state.ctx); err != nil {
+		return nil, err
+	}
 	if len(encoded) > state.bytesLeft {
 		return nil, fmt.Errorf("%w: reachable byte bound exceeded", ErrResourceLimit)
 	}
+	if err := checkEncodedNodeBytes(encoded); err != nil {
+		return nil, err
+	}
+	encoded = append([]byte(nil), encoded...)
 	if state.hashesLeft == 0 {
 		return nil, fmt.Errorf("%w: hash operation bound exceeded", ErrResourceLimit)
 	}

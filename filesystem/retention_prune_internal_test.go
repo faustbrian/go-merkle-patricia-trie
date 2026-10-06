@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	mpt "github.com/faustbrian/go-merkle-patricia-trie"
+	mpt "github.com/faustbrian/go-merkle-patricia-trie/v2"
 )
 
 func TestRetentionEncodingIdentifiersAndTemporaryRecovery(t *testing.T) {

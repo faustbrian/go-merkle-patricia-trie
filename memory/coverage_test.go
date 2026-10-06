@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	mpt "github.com/faustbrian/go-merkle-patricia-trie"
-	"github.com/faustbrian/go-merkle-patricia-trie/memory"
+	mpt "github.com/faustbrian/go-merkle-patricia-trie/v2"
+	"github.com/faustbrian/go-merkle-patricia-trie/v2/memory"
 )
 
 func TestStoreObservesCancellationAtReadAndCommitBoundaries(t *testing.T) {

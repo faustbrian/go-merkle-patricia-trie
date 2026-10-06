@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"slices"
 
-	mpt "github.com/faustbrian/go-merkle-patricia-trie"
+	mpt "github.com/faustbrian/go-merkle-patricia-trie/v2"
 )
 
 const (

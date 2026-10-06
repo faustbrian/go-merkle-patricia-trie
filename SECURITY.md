@@ -12,9 +12,15 @@ Include the affected module and version, impact, reproduction, preconditions,
 and any suggested mitigation. Reports are acknowledged as soon as practical;
 timelines depend on severity and verification.
 
+The [shared vulnerability-management procedure](https://github.com/faustbrian/go-library-tools/blob/c799f67c5f4ac074e24a0172fb41a96cce9dad8e/docs/ecosystem/security/vulnerability-management.md)
+defines severity, acknowledgement and remediation targets, private risk
+ownership, embargoes, and coordinated advisory publication. Apply it through
+the private channel above; the procedure is not evidence of a resolved finding
+or a qualified release.
+
 ## Supported Versions
 
-The latest stable `v1` release receives security fixes. Older releases and the
+The latest stable major release receives security fixes. Older releases and the
 `main` branch are not supported; upgrade before reporting. At and after v1,
 incompatible exported API or documented behavior changes require a new major
 version under the [compatibility policy](COMPATIBILITY.md) and

@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	mpt "github.com/faustbrian/go-merkle-patricia-trie"
-	"github.com/faustbrian/go-merkle-patricia-trie/internal/rlp"
+	mpt "github.com/faustbrian/go-merkle-patricia-trie/v2"
+	"github.com/faustbrian/go-merkle-patricia-trie/v2/internal/rlp"
 )
 
 func TestEIP1186AccountAndStorageProofs(t *testing.T) {

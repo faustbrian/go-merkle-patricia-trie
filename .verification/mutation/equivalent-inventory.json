@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "packages": [
+    {
+      "module_directory": ".",
+      "package_directory": ".",
+      "source_digest": "bf1efca6ef9d193f66d23d871fb37330278bc3a0924a4219dabc4d651daac295",
+      "gremlins_version": "v0.6.0",
+      "gremlins_verifier_sha256": "c28707fd4ce35dd228260de564107c1fb7726e42d4e9ea2bf9e988083e1f3b5b",
+      "mutations": [
+        {
+          "file_name": "node.go",
+          "type": "CONDITIONALS_BOUNDARY",
+          "line": 44,
+          "column": 11,
+          "contract_domain": "Derived decoded-footprint accounting with supported nonnegative count, length and saturated-summary operands",
+          "reason": "At right == MaxInt-left, the original addition and mutated saturation branch both return exactly MaxInt without overflow or side effects. Every supported caller supplies nonnegative derived counts, lengths or saturated summaries. Reassess if operand provenance or branch side effects change."
+        },
+        {
+          "file_name": "rangeproof.go",
+          "type": "CONDITIONALS_BOUNDARY",
+          "line": 269,
+          "column": 17,
+          "contract_domain": "Range generation from canonical nonempty leaf values with admitted proof-byte accounting",
+          "reason": "When key bytes equal the remaining allowance, the unchanged second disjunct rejects the positive value length before append or accounting. Leaf construction and decoding require nonempty values and branch emission excludes empty values, so changing the first boundary preserves the same resource error and state. Reassess if empty-value acceptance or charging changes."
+        },
+        {
+          "file_name": "rangeproof.go",
+          "type": "CONDITIONALS_BOUNDARY",
+          "line": 484,
+          "column": 20,
+          "contract_domain": "Range verification after invalid and empty item values have been rejected",
+          "reason": "The preceding line468 guard rejects empty values. At key-length equality the unchanged value-length disjunct therefore rejects the positive value bytes, returning the same resource error before remaining-byte accounting. Changing the first boundary is equivalent for every admitted item. Reassess if empty-value acceptance or charging changes."
+        },
+        {
+          "file_name": "recovery.go",
+          "type": "CONDITIONALS_BOUNDARY",
+          "line": 107,
+          "column": 38,
+          "contract_domain": "Pending-node recovery with successful admission and parent derivation from the same immutable snapshot",
+          "reason": "At parent depth32 successful unchanged admitPending sets compact. The original compact disjunct and changed depth boundary therefore select the same downstream compaction, state, errors and cancellation observations. Recovery obtains that parent from the same immutable snapshot. Reassess if admission compaction or parent derivation changes."
+        },
+        {
+          "file_name": "trie.go",
+          "type": "CONDITIONALS_BOUNDARY",
+          "line": 492,
+          "column": 62,
+          "contract_domain": "Trie mutation fallback with pending admission and parent derivation from the same immutable previous layer",
+          "reason": "At parent depth32 successful admission sets compact; resource-limit admission already selects fallback through err!=nil, and other errors return earlier. Parent derivation and admission observe the same immutable previous layer, so changing the depth boundary preserves the same fallback and state. Reassess if parent derivation, immutability or admission compaction changes."
+        }
+      ]
+    }
+  ]
+}

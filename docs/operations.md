@@ -182,8 +182,24 @@ Start from `DefaultLimits`, then lower bounds for the application's expected
 corpus. Review every increase as a denial-of-service budget. `Limits` covers
 key and value bytes, traversal and encoding nodes, hash operations, store
 reads, iterator results, rebuild work, batch operations, proof keys/nodes/bytes,
-and recovery nodes/bytes. `ReachabilityLimits` separately bounds roots,
-retentions, nodes, bytes, depth, reads, and hashes during audit and pruning.
+recovery nodes/bytes, and cumulative pending nodes/bytes. Pending admission
+includes stale encoded ancestry and separately bounds the materialized cache;
+it is not an aggregate process-heap budget. Encodings resolved on a changed
+path can still be shared elsewhere. Existing pressure/depth compaction reclaims
+only provably unreferenced owned encodings; an unresolved backing-store frontier
+conservatively retains the bounded union without extra reads. Admission may
+reject when that frontier prevents safe reclamation. `ReachabilityLimits` separately
+bounds roots, retentions, nodes, bytes, depth, reads, and hashes during audit
+and pruning.
+
+`MaxValueBytes` admits mutation inputs and verification claims. Reads from a
+loaded root instead enforce the canonical encoded-node ceiling, so a stored
+value can exceed the configured mutation-input bound. Iterator callbacks stream
+owned entries; applications that retain them must budget their own aggregate
+output memory. Range generation and verification additionally bound item count
+by `MaxProofKeys`, encoded witnesses by `MaxProofBytes`, and separately the
+aggregate item key/value bytes by the same `MaxProofBytes` ceiling. Deduplicated
+witnesses do not exempt repeated item values from this admission.
 
 All I/O and potentially expensive public operations take `context.Context`.
 Use caller deadlines in addition to structural limits. A nil context is

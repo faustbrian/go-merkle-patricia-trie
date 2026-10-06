@@ -180,9 +180,10 @@ func proveRangeSnapshot(
 }
 
 type rangeGenerationState struct {
-	builder *multiProofBuilder
-	bounds  rangeBounds
-	items   []RangeItem
+	builder   *multiProofBuilder
+	bounds    rangeBounds
+	items     []RangeItem
+	itemBytes int
 }
 
 func (state *rangeGenerationState) walk(
@@ -264,11 +265,16 @@ func (state *rangeGenerationState) emit(path, value []byte) error {
 	if len(state.items) == state.builder.snapshot.limits.MaxProofKeys {
 		return fmt.Errorf("%w: range item bound exceeded", ErrResourceLimit)
 	}
+	remaining := state.builder.snapshot.limits.MaxProofBytes - state.itemBytes
+	if len(path)/2 > remaining || len(value) > remaining-len(path)/2 {
+		return fmt.Errorf("%w: range item byte bound exceeded", ErrResourceLimit)
+	}
 	key, err := rangePathKey(path, state.bounds.secure)
 	if err != nil {
 		return err
 	}
 	state.items = append(state.items, NewRangeItem(key, value))
+	state.itemBytes += len(key) + len(value)
 	return nil
 }
 
@@ -457,6 +463,7 @@ func validateRangeItems(
 	if len(items) > limits.MaxProofKeys {
 		return fmt.Errorf("%w: range item bound exceeded", ErrResourceLimit)
 	}
+	remaining := limits.MaxProofBytes
 	for index, item := range items {
 		if !item.valid || len(item.value) == 0 {
 			return ErrInvalidProofClaim
@@ -474,6 +481,10 @@ func validateRangeItems(
 		if len(item.value) > limits.MaxValueBytes {
 			return fmt.Errorf("%w: value byte limit exceeded", ErrInvalidValue)
 		}
+		if len(item.key) > remaining || len(item.value) > remaining-len(item.key) {
+			return fmt.Errorf("%w: range item byte bound exceeded", ErrResourceLimit)
+		}
+		remaining -= len(item.key) + len(item.value)
 		if !rangeBytesMatch(item.key, bounds) {
 			return ErrInvalidProofClaim
 		}

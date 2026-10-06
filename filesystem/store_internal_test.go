@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	mpt "github.com/faustbrian/go-merkle-patricia-trie"
+	mpt "github.com/faustbrian/go-merkle-patricia-trie/v2"
 )
 
 func TestStoreCASIterationAndClosedLifecycle(t *testing.T) {
@@ -975,7 +975,8 @@ func TestCommitPreflightAndWriteFailureBoundaries(t *testing.T) {
 		t.Fatalf("Open(canceled write) error = %v", err)
 	}
 	cancelDuringWrite := &steppingContext{
-		remaining:      1 + len(nodes),
+		// Admission and validation precede the existing node-read preflight.
+		remaining:      4 + 2*len(nodes),
 		returnCanceled: true,
 	}
 	if err := canceledStore.CommitTrie(
@@ -1314,6 +1315,7 @@ func TestStoreCancellationAndStorageFailureBoundaries(t *testing.T) {
 	}
 
 	if err := store.validateCommit(
+		context.Background(),
 		[]mpt.StoredNode{{}},
 	); !errors.Is(err, mpt.ErrCorruptNode) {
 		t.Fatalf("validateCommit(corrupt) error = %v", err)

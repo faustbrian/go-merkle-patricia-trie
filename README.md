@@ -5,7 +5,7 @@
 [![Coverage](https://img.shields.io/badge/coverage-100%25_required-blue)](CONTRIBUTING.md#verification)
 [![Mutation](https://img.shields.io/badge/mutation-100%25_required-blue)](CONTRIBUTING.md#verification)
 [![Documentation](https://img.shields.io/badge/docs-checked_in_CI-blue)](docs/)
-[![Go Reference](https://pkg.go.dev/badge/github.com/faustbrian/go-merkle-patricia-trie.svg)](https://pkg.go.dev/github.com/faustbrian/go-merkle-patricia-trie)
+[![Go Reference](https://pkg.go.dev/badge/github.com/faustbrian/go-merkle-patricia-trie/v2.svg)](https://pkg.go.dev/github.com/faustbrian/go-merkle-patricia-trie/v2)
 [![Release](https://img.shields.io/github/v/release/faustbrian/go-merkle-patricia-trie?sort=semver)](https://github.com/faustbrian/go-merkle-patricia-trie/releases)
 [![Go](https://img.shields.io/badge/go-1.27.0-00ADD8?logo=go)](https://go.dev/)
 [![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
@@ -20,7 +20,7 @@ Merkle tree, SSZ merkleization, or Verkle tree.
 
 ## Status and portability
 
-The module is stable at v1 and requires Go 1.27.0. Its root package uses the
+This main branch targets v2 and requires Go 1.27.0. Its root package uses the
 default import identifier `mpt`; the public `memory` and `filesystem` packages
 provide process-local and durable stores. The implementation is portable Go:
 it has no platform-specific production source files and requires no cgo. The
@@ -37,8 +37,12 @@ and its directory must have one exclusive owner.
 ## Installation
 
 ```sh
-go get github.com/faustbrian/go-merkle-patricia-trie
+go get github.com/faustbrian/go-merkle-patricia-trie/v2
 ```
+
+For the required import migration and finite memory-store admission policy,
+see [upgrading to v2](docs/upgrading-v2.md). Canonical trie encodings and roots
+are unchanged.
 
 ## Quick start
 

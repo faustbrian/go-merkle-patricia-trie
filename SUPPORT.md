@@ -11,7 +11,7 @@ for adoption questions and design exploration. Consult the
 [operations guide](docs/operations.md) before opening a support request. Use
 the private process in [`SECURITY.md`](SECURITY.md) for vulnerabilities.
 
-The latest stable `v1` release receives support. Older releases and the `main`
+The latest stable major release receives support. Older releases and the `main`
 branch are not supported; upgrade before filing a request. The supported
 release's compatibility contract is defined in
 [`COMPATIBILITY.md`](COMPATIBILITY.md).

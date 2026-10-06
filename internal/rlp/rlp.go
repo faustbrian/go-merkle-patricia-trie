@@ -143,7 +143,7 @@ func prefixPayload(shortBase, longBase byte, payload []byte, maximum int) ([]byt
 			return nil, fmt.Errorf("%w: maximum encoded bytes", ErrLimit)
 		}
 		encoded := make([]byte, 1, len(payload)+1)
-		encoded[0] = shortBase + byte(len(payload))
+		encoded[0] = shortBase + byte(len(payload)) // #nosec G115 -- This branch bounds payload length to 55; the only callers supply bases 0x80 or 0xc0, so the prefix is at most 0xf7.
 		return append(encoded, payload...), nil
 	}
 
@@ -153,7 +153,7 @@ func prefixPayload(shortBase, longBase byte, payload []byte, maximum int) ([]byt
 		return nil, fmt.Errorf("%w: maximum encoded bytes", ErrLimit)
 	}
 	encoded := make([]byte, prefixBytes, prefixBytes+len(payload))
-	encoded[0] = longBase + byte(len(length))
+	encoded[0] = longBase + byte(len(length)) // #nosec G115 -- encodeLength uses an eight-byte buffer for positive int lengths; only bases 0xb7 or 0xf7 are supplied, so the prefix is at most 0xff.
 	copy(encoded[1:], length)
 	return append(encoded, payload...), nil
 }

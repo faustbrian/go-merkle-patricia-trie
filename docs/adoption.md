@@ -138,7 +138,8 @@ No. The core retains no preimage store. Secure iteration therefore exposes
 transformed 32-byte paths. A preimage adapter would be a separate explicit
 privacy and retention boundary.
 
-### Is this a stable v1 release?
+### What changes when upgrading to v2?
 
-Yes, within the documented compatibility surface and pinned provenance. Review
-the changelog and source provenance before adopting a release.
+Use the `/v2` module path and configure finite memory-store admission. See
+[upgrading to v2](upgrading-v2.md), the changelog, and source provenance before
+adopting a release. Canonical stored bytes and roots do not change.

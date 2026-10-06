@@ -1,4 +1,4 @@
-module github.com/faustbrian/go-merkle-patricia-trie
+module github.com/faustbrian/go-merkle-patricia-trie/v2
 
 go 1.27.0
 

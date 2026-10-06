@@ -16,7 +16,7 @@ import (
 	"strings"
 	"sync"
 
-	mpt "github.com/faustbrian/go-merkle-patricia-trie"
+	mpt "github.com/faustbrian/go-merkle-patricia-trie/v2"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -427,8 +427,14 @@ func (store *Store) CommitTrie(
 	if store == nil {
 		return mpt.ErrInvalidStore
 	}
+	if commit.NodeCount() > store.limits.MaxCommitNodes {
+		return fmt.Errorf("%w: commit node bound exceeded", mpt.ErrResourceLimit)
+	}
+	if err := checkContext(ctx); err != nil {
+		return err
+	}
 	nodes := commit.Nodes()
-	if err := store.validateCommit(nodes); err != nil {
+	if err := store.validateCommit(ctx, nodes); err != nil {
 		return err
 	}
 
@@ -582,18 +588,21 @@ func (store *Store) Close() error {
 	return nil
 }
 
-func (store *Store) validateCommit(nodes []mpt.StoredNode) error {
-	if len(nodes) > store.limits.MaxCommitNodes {
-		return fmt.Errorf("%w: commit node bound exceeded", mpt.ErrResourceLimit)
+func (store *Store) validateCommit(ctx context.Context, nodes []mpt.StoredNode) error {
+	if err := checkContext(ctx); err != nil {
+		return err
 	}
 	total := 0
 	for _, node := range nodes {
-		encoded := node.Encoded()
-		if len(encoded) > store.limits.MaxNodeBytes ||
-			len(encoded) > store.limits.MaxCommitBytes-total {
+		if err := checkContext(ctx); err != nil {
+			return err
+		}
+		if node.EncodedLen() > store.limits.MaxNodeBytes ||
+			node.EncodedLen() > store.limits.MaxCommitBytes-total {
 			return fmt.Errorf("%w: commit byte bound exceeded", mpt.ErrResourceLimit)
 		}
-		total += len(encoded)
+		total += node.EncodedLen()
+		encoded := node.Encoded()
 		if actual := keccakRoot(encoded); actual != node.Hash() {
 			return &mpt.CorruptNodeError{
 				Hash:  node.Hash(),
@@ -601,7 +610,7 @@ func (store *Store) validateCommit(nodes []mpt.StoredNode) error {
 			}
 		}
 	}
-	return nil
+	return checkContext(ctx)
 }
 
 func (store *Store) writeNode(node mpt.StoredNode) error {
@@ -723,8 +732,8 @@ func (store *Store) nodePath(hash mpt.Root) string {
 
 func validateLimits(limits Limits) error {
 	storedBytesHigh, _ := bits.Mul64(
-		uint64(limits.MaxStoredNodes),
-		uint64(limits.MaxNodeBytes),
+		uint64(limits.MaxStoredNodes), // #nosec G115 -- Positive platform-int values fit uint64; this side-effect-free Mul64 probe precedes signed validation below, which rejects negative limits.
+		uint64(limits.MaxNodeBytes),   // #nosec G115 -- Positive platform-int values fit uint64; this side-effect-free Mul64 probe precedes signed validation below, which rejects negative limits.
 	)
 	if limits.MaxNodeBytes <= 0 ||
 		limits.MaxNodeBytes == int(^uint(0)>>1) ||
@@ -834,7 +843,7 @@ func writeAtomicWith(
 
 func syncDirectory(path string) error {
 	return syncDirectoryWith(func() (syncFile, error) {
-		return os.Open(path)
+		return os.Open(path) // #nosec G304 -- Only caller-owned store directories are synced; trusted directory/ancestor permissions exclude hostile replacement, not a race-free check/open guarantee.
 	})
 }
 
@@ -867,7 +876,7 @@ func readDirectoryBounded(
 ) ([]os.DirEntry, error) {
 	return readDirectoryBoundedWith(
 		func() (directoryReader, error) {
-			return os.Open(path)
+			return os.Open(path) // #nosec G304 -- Enumeration opens fixed owned store directories; exclusive caller ownership includes trusted ancestors and excludes hostile path replacement.
 		},
 		maximum,
 	)
@@ -914,7 +923,7 @@ func readBoundedFile(path string, maximum int) ([]byte, error) {
 	}
 	return readRegularFile(
 		func() (readableFile, error) {
-			return os.Open(path)
+			return os.Open(path) // #nosec G304 -- Fixed metadata or validated hex names in caller-owned directories; Lstat rejects nonregular files, while hostile check/open replacement remains outside the exclusive-directory contract.
 		},
 		maximum,
 	)
@@ -1030,12 +1039,21 @@ func checkContext(ctx context.Context) error {
 }
 
 func storageReadError(err error) error {
-	return fmt.Errorf("%w: %w", mpt.ErrStorageRead, err)
+	return &storageError{category: mpt.ErrStorageRead, cause: err}
 }
 
 func storageCommitError(err error) error {
-	return fmt.Errorf("%w: %w", mpt.ErrStorageCommit, err)
+	return &storageError{category: mpt.ErrStorageCommit, cause: err}
 }
+
+type storageError struct {
+	category error
+	cause    error
+}
+
+func (err *storageError) Error() string        { return err.category.Error() }
+func (err *storageError) Unwrap() error        { return err.cause }
+func (err *storageError) Is(target error) bool { return target == err.category }
 
 var _ mpt.NodeStore = (*Store)(nil)
 var _ mpt.NodeIterator = (*Store)(nil)

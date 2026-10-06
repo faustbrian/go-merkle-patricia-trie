@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/faustbrian/go-merkle-patricia-trie/internal/rlp"
+	"github.com/faustbrian/go-merkle-patricia-trie/v2/internal/rlp"
 )
 
 // Account is a canonically decoded Ethereum state-trie account established by
@@ -225,7 +225,7 @@ func encodeStorageInteger(value []byte) []byte {
 		return []byte{value[0]}
 	}
 	encoded := make([]byte, len(value)+1)
-	encoded[0] = 0x80 + byte(len(value))
+	encoded[0] = 0x80 + byte(len(value)) // #nosec G115 -- VerifyStorageProof rejects values longer than RootBytes; UpdateSlot trims a fixed RootBytes word, so every production caller supplies at most 32 bytes.
 	copy(encoded[1:], value)
 	return encoded
 }

@@ -51,6 +51,12 @@ func (stored StoredNode) Encoded() []byte {
 	return append([]byte(nil), stored.encoded...)
 }
 
+// EncodedLen returns the encoded byte count without copying node bytes.
+// Adapters can apply admission limits before requesting an owned encoding.
+func (stored StoredNode) EncodedLen() int {
+	return len(stored.encoded)
+}
+
 // StoreCommit is an immutable atomic node-write and root-publication request.
 type StoreCommit struct {
 	previous Root
@@ -69,17 +75,28 @@ func (commit StoreCommit) Root() Root {
 	return commit.root
 }
 
-// Nodes returns an owned copy of the nodes that must become durable before Root.
-func (commit StoreCommit) Nodes() []StoredNode {
-	nodes := make([]StoredNode, len(commit.nodes))
-	for index, stored := range commit.nodes {
-		nodes[index] = StoredNode{
-			hash:    stored.hash,
-			encoded: stored.Encoded(),
-		}
-	}
-	return nodes
+// NodeCount returns the number of immutable nodes without allocating handles.
+func (commit StoreCommit) NodeCount() int {
+	return len(commit.nodes)
 }
+
+// Nodes returns an owned slice of immutable nodes that must become durable
+// before Root. Encoded returns owned bytes; enumerating handles does not copy
+// their encoded payloads.
+func (commit StoreCommit) Nodes() []StoredNode {
+	return slices.Clone(commit.nodes)
+}
+
+// storageError keeps collaborator diagnostics inspectable without rendering
+// potentially confidential paths, credentials, or payloads by default.
+type storageError struct {
+	category error
+	cause    error
+}
+
+func (err *storageError) Error() string        { return err.category.Error() }
+func (err *storageError) Unwrap() error        { return err.cause }
+func (err *storageError) Is(target error) bool { return target == err.category }
 
 // MissingNodeError identifies the exact unavailable hash without exposing key
 // or value material.
@@ -123,22 +140,37 @@ func (err *CorruptNodeError) Is(target error) bool {
 	return target == ErrCorruptNode
 }
 
-func newStoreCommit(previous, root Root, pending map[Root][]byte) StoreCommit {
+func newStoreCommitContext(ctx context.Context, previous, root Root, pending map[Root][]byte) (StoreCommit, error) {
+	if err := checkContext(ctx); err != nil {
+		return StoreCommit{}, err
+	}
 	hashes := make([]Root, 0, len(pending))
 	for hash := range pending {
+		if err := checkContext(ctx); err != nil {
+			return StoreCommit{}, err
+		}
 		hashes = append(hashes, hash)
 	}
 	slices.SortFunc(hashes, func(left, right Root) int {
 		return bytes.Compare(left[:], right[:])
 	})
+	if err := checkContext(ctx); err != nil {
+		return StoreCommit{}, err
+	}
 	nodes := make([]StoredNode, 0, len(hashes))
 	for _, hash := range hashes {
+		if err := checkContext(ctx); err != nil {
+			return StoreCommit{}, err
+		}
 		nodes = append(nodes, StoredNode{
 			hash:    hash,
 			encoded: append([]byte(nil), pending[hash]...),
 		})
 	}
-	return StoreCommit{previous: previous, root: root, nodes: nodes}
+	if err := checkContext(ctx); err != nil {
+		return StoreCommit{}, err
+	}
+	return StoreCommit{previous: previous, root: root, nodes: nodes}, nil
 }
 
 func validStore(store any) bool {

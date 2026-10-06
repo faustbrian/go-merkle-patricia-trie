@@ -82,11 +82,16 @@ func proveManySnapshot(
 	if len(keys) == 0 || len(keys) > snapshot.limits.MaxProofKeys {
 		return MultiProof{}, fmt.Errorf("%w: invalid proof key count", ErrInvalidProofClaim)
 	}
-	ordered := copyAndSortProofKeys(keys)
-	for index, key := range ordered {
+	for _, key := range keys {
+		if err := checkContext(ctx); err != nil {
+			return MultiProof{}, err
+		}
 		if len(key) > snapshot.limits.MaxKeyBytes {
 			return MultiProof{}, fmt.Errorf("%w: key byte limit exceeded", ErrInvalidKey)
 		}
+	}
+	ordered := copyAndSortProofKeys(keys)
+	for index, key := range ordered {
 		if index != 0 && bytes.Equal(key, ordered[index-1]) {
 			return MultiProof{}, ErrDuplicateProofKey
 		}
@@ -114,15 +119,16 @@ func copyAndSortProofKeys(keys [][]byte) [][]byte {
 }
 
 type multiProofBuilder struct {
-	ctx      context.Context
-	snapshot *trieSnapshot
-	state    traversalState
-	pending  map[Root][]byte
-	decoded  map[Root]node
-	seen     map[Root]struct{}
-	nodes    [][]byte
-	total    int
-	root     node
+	ctx              context.Context
+	snapshot         *trieSnapshot
+	state            traversalState
+	pending          map[Root][]byte
+	decoded          map[Root]node
+	seen             map[Root]struct{}
+	nodes            [][]byte
+	total            int
+	root             node
+	preparationError error
 }
 
 func newMultiProofBuilder(
@@ -130,10 +136,11 @@ func newMultiProofBuilder(
 	snapshot *trieSnapshot,
 ) *multiProofBuilder {
 	budget := &workBudget{hashesLeft: snapshot.limits.MaxHashOperations}
-	pending := materializeSnapshotPending(snapshot)
+	pending, err := materializeSnapshotPendingContext(ctx, snapshot)
 	return &multiProofBuilder{
 		ctx: ctx, snapshot: snapshot, pending: pending,
-		decoded: make(map[Root]node), seen: make(map[Root]struct{}),
+		preparationError: err,
+		decoded:          make(map[Root]node), seen: make(map[Root]struct{}),
 		state: traversalState{
 			ctx: ctx, maxDepth: snapshot.limits.MaxTraversalDepth,
 			nodesLeft: snapshot.limits.MaxTraversalNodes,
@@ -146,6 +153,9 @@ func newMultiProofBuilder(
 }
 
 func (builder *multiProofBuilder) prepareRoot() error {
+	if builder.preparationError != nil {
+		return builder.preparationError
+	}
 	if builder.snapshot.root == nil {
 		return nil
 	}
@@ -183,7 +193,9 @@ func (builder *multiProofBuilder) prepareRoot() error {
 	if actual != rootHash {
 		return fmt.Errorf("%w: snapshot root encoding mismatch", ErrMalformedNode)
 	}
-	mergePersisted(builder.pending, persisted)
+	if err := mergePersisted(builder.ctx, builder.pending, persisted); err != nil {
+		return err
+	}
 	builder.decoded[rootHash] = builder.snapshot.root
 	builder.root = builder.snapshot.root
 	return builder.appendNode(rootHash, encoded)
