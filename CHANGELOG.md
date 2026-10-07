@@ -6,6 +6,10 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
 
 ### Changed
 
+- Adopt `golang.org/x/crypto` v0.57.0 and indirect `golang.org/x/sys`
+  v0.48.0. The used legacy Keccak implementation and endian handling are
+  unchanged; canonical roots, proofs, and persisted node hashes require no
+  migration. The separate Geth interoperability graph retains its prior pins.
 - Target v2 with the official `/v2` module/import path. Memory stores now apply
   finite cumulative node/encoded-byte admission to new and zero-value stores;
   explicit positive limits and pruning control historical retention capacity.
