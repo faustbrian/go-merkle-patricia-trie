@@ -5,6 +5,7 @@ import (
 	"go/parser"
 	"go/token"
 	"io/fs"
+	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -19,6 +20,41 @@ func TestProductionPackagesOwnNoGoroutines(t *testing.T) {
 		t.Fatal("locate module source")
 	}
 	moduleDirectory := filepath.Dir(sourceFile)
+	positions, err := productionGoroutines(moduleDirectory)
+	if err != nil {
+		t.Fatalf("inspect production sources: %v", err)
+	}
+	for _, position := range positions {
+		t.Errorf("production goroutine at %s", position)
+	}
+}
+
+func TestProductionGoroutineScopeExcludesExternalTooling(t *testing.T) {
+	t.Parallel()
+	directory := t.TempDir()
+	tooling := filepath.Join(directory, ".golib-tooling")
+	if err := os.Mkdir(tooling, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	for _, path := range []string{
+		filepath.Join(directory, "owned.go"),
+		filepath.Join(tooling, "external.go"),
+	} {
+		if err := os.WriteFile(path, []byte("package fixture\nfunc start() { go func() {}() }\n"), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	positions, err := productionGoroutines(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(positions) != 1 || positions[0].Filename != filepath.Join(directory, "owned.go") {
+		t.Fatalf("expected only the owned production goroutine, got %v", positions)
+	}
+}
+
+func productionGoroutines(moduleDirectory string) ([]token.Position, error) {
+	var positions []token.Position
 	fileSet := token.NewFileSet()
 	err := filepath.WalkDir(
 		moduleDirectory,
@@ -30,6 +66,11 @@ func TestProductionPackagesOwnNoGoroutines(t *testing.T) {
 				switch entry.Name() {
 				case ".ai", "_interop", "benchmarks", "node_modules", "testdata":
 					if path != moduleDirectory {
+						return filepath.SkipDir
+					}
+				case ".golib-tooling":
+					// CI checks out an independent tooling module here, not package production code.
+					if path == filepath.Join(moduleDirectory, ".golib-tooling") {
 						return filepath.SkipDir
 					}
 				}
@@ -51,17 +92,12 @@ func TestProductionPackagesOwnNoGoroutines(t *testing.T) {
 			ast.Inspect(parsed, func(node ast.Node) bool {
 				statement, isGoStatement := node.(*ast.GoStmt)
 				if isGoStatement {
-					t.Errorf(
-						"production goroutine at %s",
-						fileSet.Position(statement.Go),
-					)
+					positions = append(positions, fileSet.Position(statement.Go))
 				}
 				return true
 			})
 			return nil
 		},
 	)
-	if err != nil {
-		t.Fatalf("inspect production sources: %v", err)
-	}
+	return positions, err
 }
