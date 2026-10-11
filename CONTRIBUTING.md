@@ -84,6 +84,40 @@ are explicitly selected, not ordinary CI results. Report unavailable or failing
 checks without claiming release readiness. CI/configuration-only changes do not
 require a library release.
 
+## Selected Weekly Assurance
+
+[`assurance.yml`](.github/workflows/assurance.yml) runs on main each Saturday
+at 05:17 UTC. It selects one of the 21 declared root-module fuzz targets using
+the shared UTC-week selector, not all targets each week. Explicit main-only
+dispatch accepts one exact declared selector, for example
+`^FuzzCanonicalNodeDecodeRoundTrip$`.
+
+The selected risks include canonical node/RLP/path/record encodings, bounded
+hostile proof and recovery inputs, trie mutation models, iteration cancellation
+and retention/pruning state. Existing round-trip targets assert canonical
+bytes; model targets compare stored or iterated values with their reference.
+Hostile proof targets exercise panic safety but discard verification results:
+their pass does not prove that every invalid proof is rejected. These are not
+blanket cryptographic, root/hash, Ethereum conformance or deployment claims.
+Retain affected pinned fixtures, peer interoperability, filesystem concurrency,
+public API and supported/experimental contract checks.
+
+The immutable shared runner bounds active fuzzing to 30 seconds, two workers
+and two CPUs, with a five-minute combined native session, 2 GiB memory and
+1 MiB output limits inside a ten-minute job. It installs the declared public
+CLI without a source build, uses private disposable caches and keeps failures,
+timeouts and exhausted budgets visible. Ordinary deterministic tests still run
+seeds/corpus; ordinary CI and its Required contract are unchanged. Full/manual
+operations retain all 21 targets at 10000x/2m each, conformance, interoperability
+and benchmark budgets in `.golib.yaml`. The selected route needs no live service
+or test tag; it does not substitute for the Node.js/npm and tagged Geth harness
+used by explicit interoperability qualification.
+
+Treat findings as owner-attributed diagnostics: promptly repair viable defects
+with focused regressions; retain reviewed narrow equivalent/invalid dispositions
+rather than weakening tests. Review cadence against useful findings and actual
+cost; do not interpret a selected pass as full or release qualification.
+
 ## Adding A Module
 
 Follow [repository structure policy](AGENTS.md#repository-structure). New modules
