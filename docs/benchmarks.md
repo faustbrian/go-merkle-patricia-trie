@@ -4,8 +4,9 @@
 
 Benchmarks characterize this v1 implementation on one recorded machine.
 They are not service-level objectives, portable regression thresholds, or
-evidence that a supplied Ethereum root is canonical. The CI benchmark gate is
-a reproducibility smoke test; it does not rank clients.
+evidence that a supplied Ethereum root is canonical. The explicit full-route
+benchmark gate is a reproducibility smoke test; it does not rank clients.
+Ordinary local and scheduled CI checks do not run this benchmark campaign.
 
 The committed raw data, summaries, environment, and benchmark-input checksums
 are under [`benchmarks`](../benchmarks). Results are invalid after any checksum
@@ -163,16 +164,16 @@ and runtime overhead is not presented as trie performance.
 
 ## Reproduction
 
-The CI-compatible smoke matrix is:
+The explicit smoke matrix is:
 
 ```sh
-make benchmark
+make -f verification/package.mk benchmark
 ```
 
 The pinned Geth comparison is:
 
 ```sh
-make benchmark-comparison
+make -f verification/package.mk benchmark-comparison
 ```
 
 To reproduce the release distributions:

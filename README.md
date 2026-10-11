@@ -3,7 +3,7 @@
 [![CI](https://github.com/faustbrian/go-merkle-patricia-trie/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/faustbrian/go-merkle-patricia-trie/actions/workflows/ci.yml)
 [![CodeQL](https://img.shields.io/badge/CodeQL-required-blue)](https://github.com/faustbrian/go-merkle-patricia-trie/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/badge/coverage-100%25_required-blue)](CONTRIBUTING.md#verification)
-[![Mutation](https://img.shields.io/badge/mutation-100%25_required-blue)](CONTRIBUTING.md#verification)
+[![Mutation](https://img.shields.io/badge/mutation-full%2Frelease-blue)](CONTRIBUTING.md#verification)
 [![Documentation](https://img.shields.io/badge/docs-checked_in_CI-blue)](docs/)
 [![Go Reference](https://pkg.go.dev/badge/github.com/faustbrian/go-merkle-patricia-trie/v2.svg)](https://pkg.go.dev/github.com/faustbrian/go-merkle-patricia-trie/v2)
 [![Release](https://img.shields.io/github/v/release/faustbrian/go-merkle-patricia-trie?sort=semver)](https://github.com/faustbrian/go-merkle-patricia-trie/releases)
@@ -102,8 +102,17 @@ and its [Domain utilities family](https://github.com/faustbrian/go-library-tools
 
 ## Development
 
-Run `make check` for the repository contract and the documented conformance
-gates before changing encoding, commitment, proof, or storage behavior.
+Use Go 1.27.2 for development; the public minimum remains Go 1.27.0.
+`GOWORK=off go test ./...` runs deterministic tests and fuzz seeds. With the
+checksum-verified public `golib` v2.1.1 release, `make check` and `make ci` run
+bounded local checks, including a named filesystem concurrency assertion.
+No external services or test tags are declared. Base-free local checks do not
+run active fuzz; choose a focused 2s target explicitly, or use changed-source CI's
+selected smoke. Optional one-package mutation and the peer harness prerequisites
+are documented in [CONTRIBUTING.md](CONTRIBUTING.md#verification).
+Use `make check-full` for the original full campaigns and online specification
+validation before relevant encoding, commitment, proof or storage qualification;
+ordinary scheduled CI remains bounded.
 
 ## License
 
