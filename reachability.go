@@ -10,12 +10,19 @@ import (
 
 // ReachabilityLimits bounds retained-root validation and pruning mark work.
 type ReachabilityLimits struct {
-	MaxRoots          int
-	MaxRetentions     int
-	MaxNodes          int
-	MaxBytes          int
-	MaxDepth          int
-	MaxNodeReads      int
+	// MaxRoots caps root commitments admitted to one reachability walk.
+	MaxRoots int
+	// MaxRetentions caps historical leases admitted by retain/prune providers.
+	MaxRetentions int
+	// MaxNodes caps decoded node visits, including embedded nodes.
+	MaxNodes int
+	// MaxBytes caps distinct hash-addressed encoded bytes collected.
+	MaxBytes int
+	// MaxDepth caps root-relative traversal depth.
+	MaxDepth int
+	// MaxNodeReads caps backing-reader calls, shared across all roots.
+	MaxNodeReads int
+	// MaxHashOperations caps integrity hashes, shared across all roots.
 	MaxHashOperations int
 }
 
@@ -38,7 +45,10 @@ func DefaultReachabilityLimits() ReachabilityLimits {
 // eligible for a later prune; it does not itself delete nodes. Repeated release
 // returns ErrReleasedRetention.
 type RootRetention interface {
+	// Root returns the retained commitment without transferring node ownership.
 	Root() Root
+	// Release removes this lease, not nodes. A durability error may follow
+	// logical release; use the provider's reconciliation contract before retrying.
 	Release(ctx context.Context) error
 }
 
@@ -46,6 +56,8 @@ type RootRetention interface {
 // Implementations must document whether leases survive restart and how callers
 // reconcile an error reported after durable lease publication.
 type RootRetainer interface {
+	// RetainRoot verifies reachability before acquiring an independent lease;
+	// a partial lease/error result must be reconciled according to the provider.
 	RetainRoot(
 		ctx context.Context,
 		root Root,
@@ -59,6 +71,8 @@ type RootRetainer interface {
 // result describes it; a zero result with an error means deletion did not
 // commit. Implementations must document recovery for interrupted operations.
 type NodePruner interface {
+	// Prune retains published/leased reachable graphs and reports committed
+	// accounting separately from post-commit cleanup/durability errors.
 	Prune(ctx context.Context, limits ReachabilityLimits) (PruneResult, error)
 }
 
@@ -89,7 +103,8 @@ func (result PruneResult) RemovedBytes() uint64 {
 	return result.removedBytes
 }
 
-// NewPruneResult constructs an immutable store pruning result.
+// NewPruneResult stores supplied accounting without validating counts or
+// performing pruning. Synthetic results are not evidence that deletion occurred.
 func NewPruneResult(
 	storedBefore, storedAfter int,
 	removedBytes uint64,

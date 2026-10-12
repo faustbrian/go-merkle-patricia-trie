@@ -10,7 +10,9 @@ import (
 
 // SortedBuilder incrementally calculates a raw-trie root from strictly sorted
 // key/value input. It retains only the open trie frontier and is not safe for
-// concurrent mutation. Its zero value rejects use with ErrUninitialized.
+// concurrent mutation. MaxTraversalDepth also admits the uncompressed frontier
+// (two nibbles per key byte plus the root frame), so a key may fit RawTrie but
+// exceed the builder depth policy. Its zero value rejects use with ErrUninitialized.
 type SortedBuilder struct {
 	state *sortedBuilderState
 }
@@ -68,7 +70,8 @@ func NewSortedBuilder(limits Limits) (*SortedBuilder, error) {
 
 // Add consumes one key/value pair. Keys must be strictly increasing in byte
 // lexicographic order and values must be non-empty. Rejected input leaves the
-// builder unchanged.
+// builder unchanged. Inputs are copied, and hash/encoding work budgets persist
+// across successful calls rather than resetting per item. It owns no node store.
 func (builder *SortedBuilder) Add(
 	ctx context.Context,
 	key, value []byte,
@@ -129,7 +132,8 @@ func (builder *SortedBuilder) Add(
 }
 
 // Finalize returns the canonical 32-byte root exactly once. An empty builder
-// returns EmptyRoot.
+// returns EmptyRoot. An encoding/cancellation failure preserves accepted state
+// for retry; after success Add and Finalize return ErrClosedBuilder.
 func (builder *SortedBuilder) Finalize(ctx context.Context) (Root, error) {
 	if builder == nil || builder.state == nil {
 		return Root{}, ErrUninitialized

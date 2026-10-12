@@ -20,6 +20,11 @@ var (
 	benchmarkStorage mpt.StorageTrie
 )
 
+// These workloads separate empty/materialized/stored access from construction,
+// persistence and proofs. B.Loop excludes initial fixture setup; explicit timer
+// resets/pauses exclude population and prune preparation. Mutation benchmarks
+// reuse a base snapshot, while construction includes all updates and commit
+// includes a fresh memory store. Compare equivalent corpus and ownership only.
 func BenchmarkGetEmpty(b *testing.B) {
 	trie, err := mpt.NewRawTrie(mpt.DefaultLimits())
 	if err != nil {

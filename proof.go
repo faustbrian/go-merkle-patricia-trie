@@ -6,8 +6,10 @@ import (
 	"slices"
 )
 
-// Proof is an immutable ordered sequence of canonical RLP nodes. The root node
-// is first; embedded children are carried by their parent and are not repeated.
+// Proof owns ordered transport node bytes. Generation emits canonical nodes
+// root first, with embedded children carried only by their parent. Construction
+// alone does not establish canonicality or a claim; verification does. Its zero
+// value is the empty witness used for absence under EmptyRoot.
 type Proof struct {
 	nodes [][]byte
 }
@@ -352,6 +354,8 @@ func finishProofClaim(
 	value, expectedValue []byte,
 	wantPresent bool,
 ) error {
+	// MPT-DEC-007 is stricter than a transport node bag: accepting a claim does
+	// not authorize unrelated surplus nodes to ride along with its witness.
 	if consumed != len(proof.nodes) {
 		return fmt.Errorf("%w: surplus proof nodes", ErrMalformedProof)
 	}

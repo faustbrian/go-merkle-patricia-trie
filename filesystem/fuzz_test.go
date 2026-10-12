@@ -9,6 +9,8 @@ import (
 	mpt "github.com/faustbrian/go-merkle-patricia-trie/v2"
 )
 
+// FuzzRootRecordCanonicalRoundTrip bounds input to the fixed version-1 record size
+// plus one and checks accepted checksum/record replay.
 func FuzzRootRecordCanonicalRoundTrip(f *testing.F) {
 	f.Add(encodeRootRecord(mpt.EmptyRoot()))
 	f.Add([]byte("malformed"))
@@ -28,6 +30,8 @@ func FuzzRootRecordCanonicalRoundTrip(f *testing.F) {
 	})
 }
 
+// FuzzNodeFilenameCanonicalDecode bounds names to the fixed hash width plus one and
+// checks lowercase canonical hex replay.
 func FuzzNodeFilenameCanonicalDecode(f *testing.F) {
 	f.Add(strings.Repeat("00", mpt.RootBytes))
 	f.Add(strings.Repeat("AA", mpt.RootBytes))
@@ -47,6 +51,8 @@ func FuzzNodeFilenameCanonicalDecode(f *testing.F) {
 	})
 }
 
+// FuzzRetentionRecordCanonicalRoundTrip bounds input to the fixed version-1 lease
+// record size plus one and checks accepted record replay.
 func FuzzRetentionRecordCanonicalRoundTrip(f *testing.F) {
 	f.Add(encodeRetentionRecord(mpt.EmptyRoot()))
 	f.Add([]byte("malformed"))
@@ -66,6 +72,8 @@ func FuzzRetentionRecordCanonicalRoundTrip(f *testing.F) {
 	})
 }
 
+// FuzzRetentionFilenameCanonicalDecode bounds lease names to the fixed identifier
+// width plus one and checks lowercase canonical hex replay.
 func FuzzRetentionFilenameCanonicalDecode(f *testing.F) {
 	f.Add(strings.Repeat("00", retentionIDBytes))
 	f.Add(strings.Repeat("AA", retentionIDBytes))

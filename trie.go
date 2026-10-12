@@ -6,29 +6,50 @@ import (
 	"fmt"
 )
 
-// Limits bounds trie traversal, encoding, hashing, storage reads, iteration,
-// batches, and proofs.
+// Limits selects positive admission/work bounds, not measured heap/RSS or a
+// deadline. Budgets belong to individual operation/path phases; builders retain
+// encoding/hash budgets across calls. MaxKeyBytes, MaxValueBytes and traversal
+// depth also have hard encoding ceilings. The zero Limits is invalid.
 type Limits struct {
-	MaxKeyBytes        int
-	MaxValueBytes      int
-	MaxTraversalDepth  int
-	MaxTraversalNodes  int
-	MaxEncodingNodes   int
-	MaxHashOperations  int
-	MaxNodeReads       int
+	// MaxKeyBytes caps caller key bytes before raw expansion or secure hashing.
+	MaxKeyBytes int
+	// MaxValueBytes caps mutation inputs/proof claims, not values read from loaded
+	// roots.
+	MaxValueBytes int
+	// MaxTraversalDepth caps path depth, with the root at depth zero.
+	MaxTraversalDepth int
+	// MaxTraversalNodes caps charged traversal states in an operation or proof path.
+	MaxTraversalNodes int
+	// MaxEncodingNodes caps one encoding walk and materialized snapshot node count.
+	MaxEncodingNodes int
+	// MaxHashOperations caps charged legacy Keccak operations; builders share it across
+	// calls.
+	MaxHashOperations int
+	// MaxNodeReads caps backing-reader calls charged during traversal.
+	MaxNodeReads int
+	// MaxIteratorResults caps matching entries, even when iteration Limit is zero.
 	MaxIteratorResults int
-	MaxIterationNodes  int
-	MaxRebuildNodes    int
+	// MaxIterationNodes caps states visited by an ordered iteration.
+	MaxIterationNodes int
+	// MaxRebuildNodes caps insertion states while rebuilding ordered entries.
+	MaxRebuildNodes int
+	// MaxBatchOperations caps mutations or indexed values in one batch/root request.
 	MaxBatchOperations int
-	MaxProofKeys       int
-	MaxProofNodes      int
-	MaxProofBytes      int
-	MaxRecoveryNodes   int
-	MaxRecoveryBytes   int
-	// MaxPendingNodes and MaxPendingBytes bound each snapshot's encoded pending
-	// chain (including stale ancestry) and materialized node/path/value cache.
-	// Cache admission also uses MaxEncodingNodes and MaxTraversalDepth.
+	// MaxProofKeys caps requested keys, claims or returned range items.
+	MaxProofKeys int
+	// MaxProofNodes caps encoded witness records, not embedded children separately.
+	MaxProofNodes int
+	// MaxProofBytes caps witness bytes; range item bytes have a separate equal ceiling.
+	MaxProofBytes int
+	// MaxRecoveryNodes caps distinct recovered overlay nodes retained by a snapshot.
+	MaxRecoveryNodes int
+	// MaxRecoveryBytes caps retained recovered-node bytes.
+	MaxRecoveryBytes int
+	// MaxPendingNodes bounds encoded pending chains, including stale ancestry,
+	// and materialized nodes. Cache admission also uses encoding/depth bounds.
 	MaxPendingNodes int
+	// MaxPendingBytes independently caps pending encodings and materialized
+	// path/value bytes; it excludes Go headers and other retained snapshots.
 	MaxPendingBytes int
 }
 
@@ -75,8 +96,11 @@ type trieSnapshot struct {
 	recoveryBytes int
 }
 
-// RawTrie is an immutable trie that uses caller bytes directly as its path.
-// A zero RawTrie rejects use with ErrUninitialized.
+// RawTrie is an immutable trie that uses caller bytes directly as its path,
+// including an empty key. Updated values are copied; the receiver is unchanged
+// on success or failure. Concurrent snapshot use requires a safe backing reader
+// and retention of any historical nodes it needs. A zero RawTrie rejects use
+// with ErrUninitialized.
 type RawTrie struct {
 	snapshot *trieSnapshot
 }
@@ -92,7 +116,9 @@ func NewRawTrie(limits Limits) (RawTrie, error) {
 	}}, nil
 }
 
-// LoadRawTrie constructs a lazy immutable raw trie from a trusted root.
+// LoadRawTrie records root and borrows reader without reading or validating
+// reachable nodes. Integrity/canonicality are checked as nodes are accessed;
+// the caller must independently authorize the root and keep its nodes available.
 func LoadRawTrie(root Root, reader NodeReader, limits Limits) (RawTrie, error) {
 	snapshot, err := loadSnapshot(root, reader, limits)
 	if err != nil {
@@ -133,7 +159,7 @@ func (trie RawTrie) Update(ctx context.Context, key, value []byte) (RawTrie, err
 	return RawTrie{snapshot: snapshot}, nil
 }
 
-// Delete returns a new snapshot without key.
+// Delete returns a new snapshot without key, or ErrAbsentKey if it was absent.
 func (trie RawTrie) Delete(ctx context.Context, key []byte) (RawTrie, error) {
 	snapshot, err := deleteSnapshot(ctx, trie.snapshot, key, false)
 	if err != nil {
@@ -142,7 +168,11 @@ func (trie RawTrie) Delete(ctx context.Context, key []byte) (RawTrie, error) {
 	return RawTrie{snapshot: snapshot}, nil
 }
 
-// Commit atomically writes every pending hashed node and publishes the root.
+// Commit prepares owned pending nodes and asks store to publish with the base
+// root as its compare-and-swap expectation. Loaded snapshots must use their
+// original store; Rebuild permits migration. An error returns a zero trie and
+// leaves this receiver unchanged, but a provider's post-publication durability
+// error may leave the new root observable; reconcile using that store's contract.
 func (trie RawTrie) Commit(ctx context.Context, store NodeStore) (RawTrie, error) {
 	snapshot, err := commitSnapshot(ctx, trie.snapshot, store)
 	if err != nil {
@@ -152,7 +182,10 @@ func (trie RawTrie) Commit(ctx context.Context, store NodeStore) (RawTrie, error
 }
 
 // SecureTrie is an immutable trie that applies legacy Keccak-256 exactly once
-// to each caller key before path traversal. It has no pre-hashed-key method.
+// to each caller key before path traversal. Mutation/lookups have no pre-hashed
+// key entry point; passing a digest hashes it again. Snapshot ownership and
+// provider-dependent concurrent availability follow RawTrie. Its zero value
+// rejects use with ErrUninitialized.
 type SecureTrie struct {
 	snapshot *trieSnapshot
 }
@@ -168,7 +201,9 @@ func NewSecureTrie(limits Limits) (SecureTrie, error) {
 	}}, nil
 }
 
-// LoadSecureTrie constructs a lazy immutable secure trie from a trusted root.
+// LoadSecureTrie records root and borrows reader without eager graph validation.
+// The caller authorizes the root and owns reader lifetime/historical retention;
+// integrity and canonicality are checked on subsequent access.
 func LoadSecureTrie(root Root, reader NodeReader, limits Limits) (SecureTrie, error) {
 	snapshot, err := loadSnapshot(root, reader, limits)
 	if err != nil {
@@ -210,7 +245,7 @@ func (trie SecureTrie) Update(ctx context.Context, key, value []byte) (SecureTri
 	return SecureTrie{snapshot: snapshot}, nil
 }
 
-// Delete returns a new secure snapshot without key.
+// Delete returns a new secure snapshot without key, or ErrAbsentKey if absent.
 func (trie SecureTrie) Delete(ctx context.Context, key []byte) (SecureTrie, error) {
 	snapshot, err := deleteSnapshot(ctx, trie.snapshot, key, true)
 	if err != nil {
@@ -219,7 +254,11 @@ func (trie SecureTrie) Delete(ctx context.Context, key []byte) (SecureTrie, erro
 	return SecureTrie{snapshot: snapshot}, nil
 }
 
-// Commit atomically writes every pending hashed node and publishes the root.
+// Commit prepares owned pending nodes and asks store to publish with the base
+// root as its compare-and-swap expectation. Loaded snapshots must use their
+// original store; Rebuild permits migration. An error returns a zero trie and
+// leaves this receiver unchanged, but a provider's post-publication durability
+// error may leave the new root observable; reconcile using that store's contract.
 func (trie SecureTrie) Commit(ctx context.Context, store NodeStore) (SecureTrie, error) {
 	snapshot, err := commitSnapshot(ctx, trie.snapshot, store)
 	if err != nil {

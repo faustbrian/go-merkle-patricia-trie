@@ -9,7 +9,8 @@ import (
 // RecoverNode copies, hash-checks, and canonically decodes one node retrieved
 // after a MissingNodeError, then returns a new raw snapshot that consults the
 // bounded recovery overlay before its backing reader. The receiver is
-// unchanged. Commit atomically persists recovered nodes to the source store.
+// unchanged. Admission does not establish reachability or fetch other missing
+// nodes. Commit delegates persistence/publication to the source store contract.
 func (trie RawTrie) RecoverNode(
 	ctx context.Context,
 	hash Root,
@@ -25,7 +26,8 @@ func (trie RawTrie) RecoverNode(
 // RecoverNode copies, hash-checks, and canonically decodes one node retrieved
 // after a MissingNodeError, then returns a new secure snapshot that consults
 // the bounded recovery overlay before its backing reader. The receiver is
-// unchanged. Commit atomically persists recovered nodes to the source store.
+// unchanged. Admission does not establish reachability or fetch other missing
+// nodes. Commit delegates persistence/publication to the source store contract.
 func (trie SecureTrie) RecoverNode(
 	ctx context.Context,
 	hash Root,

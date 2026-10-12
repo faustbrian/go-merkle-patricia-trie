@@ -32,6 +32,8 @@ func BenchmarkSnapshotAdmissionUpdateScaling(b *testing.B) {
 	}
 }
 
+// BenchmarkComparableRawGetOwned reads one key from 1024 materialized entries
+// after setup, returning owned bytes like the separately pinned Geth workload.
 func BenchmarkComparableRawGetOwned(b *testing.B) {
 	trie := benchmarkPopulatedTrie(b, 1024)
 	ctx := context.Background()

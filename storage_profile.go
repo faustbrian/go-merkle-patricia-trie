@@ -63,7 +63,8 @@ func (trie StorageTrie) HasSlot(
 }
 
 // UpdateSlot returns a new snapshot containing value at slot. An all-zero word
-// deletes the slot, matching the Ethereum storage-trie default value.
+// deletes the slot, matching the Ethereum storage-trie default value. Deleting
+// an already absent slot returns ErrAbsentKey rather than a successful no-op.
 func (trie StorageTrie) UpdateSlot(
 	ctx context.Context,
 	slot [RootBytes]byte,

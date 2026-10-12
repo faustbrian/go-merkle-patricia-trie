@@ -11,7 +11,8 @@ set before returning a new snapshot. Construct mutations with `Put` and
 `Remove`. A batch rejects zero-value mutations, empty put values, repeated
 keys, invalid keys or values, and work beyond `MaxBatchOperations`.
 
-Snapshots are safe for concurrent reads. Multiple goroutines may derive new
+Snapshots are immutable; concurrent use requires a safe backing reader and
+availability of retained historical nodes. Multiple goroutines may derive new
 snapshots from the same old snapshot. The application owns synchronization
 when deciding which derived root becomes authoritative. `SortedBuilder` is a
 separate mutable object owned by one caller and cannot be used after successful
@@ -173,8 +174,9 @@ Use `errors.Is` for stable categories and `errors.As` for bounded diagnostics:
 | Work exceeded a bound | `ErrResourceLimit` | Reject or deliberately raise a reviewed limit |
 | Context ended | `ErrCanceled` plus context cause | Apply normal cancellation or deadline policy |
 
-Errors do not include complete keys, values, encoded nodes, proofs, preimages,
-or storage credentials.
+Default package diagnostics omit complete keys, values, encoded nodes, proofs,
+preimages and storage credentials. Iterator callback errors propagate unchanged;
+caller code controls their contents and whether sensitive causes are logged.
 
 ## Resource limits
 
@@ -202,5 +204,8 @@ aggregate item key/value bytes by the same `MaxProofBytes` ceiling. Deduplicated
 witnesses do not exempt repeated item values from this admission.
 
 All I/O and potentially expensive public operations take `context.Context`.
-Use caller deadlines in addition to structural limits. A nil context is
-rejected; there are no hidden goroutines or background retries.
+Use caller deadlines in addition to structural limits; synchronous providers,
+callbacks, file operations and RLP/hash phases are not forcibly preempted.
+Constructors without limit arguments copy caller-sized input before operation
+admission, so bound transport input before constructing mutations or claims.
+A nil context is rejected; there are no hidden goroutines or background retries.

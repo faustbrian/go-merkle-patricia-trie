@@ -277,6 +277,8 @@ func childReference(
 	if err := mergePersisted(state.ctx, persisted, child.persisted); err != nil {
 		return rlp.Value{}, nil, err
 	}
+	// Yellow Paper Appendix D / MPT-DEC-003: embed the complete child RLP below
+	// 32 bytes, not a string wrapping it. Roots are still hashed at every size.
 	if len(child.bytes) < RootBytes {
 		return child.value, persisted, nil
 	}

@@ -16,6 +16,8 @@ type fuzzMutation struct {
 	delete bool
 }
 
+// FuzzSortedBuilderMutationHistoryParity bounds input to 512 bytes/64 entries and
+// compares accepted sorted prefixes with ordinary insertion roots.
 func FuzzSortedBuilderMutationHistoryParity(f *testing.F) {
 	f.Add([]byte{1, 'a', 0, '1', 1, 'b', 0, '2'})
 	f.Add([]byte{1, 'b', 0, '1', 1, 'a', 0, '2'})
@@ -84,6 +86,8 @@ func FuzzSortedBuilderMutationHistoryParity(f *testing.F) {
 	})
 }
 
+// FuzzRawAndSecureRebuildMutationParity bounds histories to 64 mutations and checks
+// rebuilt roots and values in both key profiles.
 func FuzzRawAndSecureRebuildMutationParity(f *testing.F) {
 	f.Add([]byte{0x01, 'a', 0, '1', 0x01, 'b', 0, '2'})
 	f.Add([]byte{0x01, 'a', 0, '1', 0x81, 'a'})
@@ -158,6 +162,8 @@ func FuzzRawAndSecureRebuildMutationParity(f *testing.F) {
 	})
 }
 
+// FuzzEIP1186AccountAndStorageVerification bounds typed fields/witness bytes, checks
+// generated membership/absence and requires a surplus node to fail.
 func FuzzEIP1186AccountAndStorageVerification(f *testing.F) {
 	f.Add(
 		[]byte("account address"),
@@ -302,6 +308,8 @@ func FuzzEIP1186AccountAndStorageVerification(f *testing.F) {
 	})
 }
 
+// FuzzCommitRecoveryStateMachine bounds two value seeds and checks corruption
+// rejection, idempotent overlay recovery and reload after repair.
 func FuzzCommitRecoveryStateMachine(f *testing.F) {
 	f.Add([]byte("first"), []byte("second"), byte(0))
 	f.Add([]byte(nil), []byte(nil), byte(1))
@@ -393,6 +401,8 @@ func FuzzCommitRecoveryStateMachine(f *testing.F) {
 	})
 }
 
+// FuzzIterationCancellationAndCallbackFailure bounds a mutation history and checks
+// canceled admission plus exact callback-error/delivery-count behavior.
 func FuzzIterationCancellationAndCallbackFailure(f *testing.F) {
 	f.Add([]byte{0x01, 'a', 0, '1'}, byte(0), false)
 	f.Add([]byte{0x01, 'a', 0, '1'}, byte(1), true)

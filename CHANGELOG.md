@@ -4,6 +4,12 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
 
 ## [Unreleased]
 
+### Documentation
+
+- Clarify proof admission versus verified claims, borrowed-reader ownership,
+  snapshot and callback limits, and filesystem publication/recovery outcomes
+  without changing commitments, proof bytes or persisted records.
+
 ## [2.0.1] - 2026-10-08
 
 ### Changed

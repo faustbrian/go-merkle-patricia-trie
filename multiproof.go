@@ -7,8 +7,10 @@ import (
 	"slices"
 )
 
-// MultiProof is an immutable deterministic sequence of canonical RLP nodes
-// shared by multiple proof paths. Each hashed node appears exactly once.
+// MultiProof owns transport nodes for several paths. Generation orders keys by
+// caller bytes and emits shared hashed nodes once, on first use. Imported bytes
+// are not certified canonical/deduplicated until verification; an empty witness
+// can establish only absence claims under EmptyRoot.
 type MultiProof struct {
 	nodes [][]byte
 }
@@ -24,7 +26,7 @@ func MultiProofFromNodes(nodes [][]byte, limits Limits) (MultiProof, error) {
 	return MultiProof(proof), nil
 }
 
-// Nodes returns owned copies of the ordered deduplicated encoded nodes.
+// Nodes copies stored transport bytes in order; it does not remove duplicates.
 func (proof MultiProof) Nodes() [][]byte {
 	return Proof(proof).Nodes()
 }
@@ -38,7 +40,8 @@ type ProofClaim struct {
 	valid   bool
 }
 
-// MembershipClaim constructs an exact key/value membership claim.
+// MembershipClaim copies key/value without admission. Verification rejects
+// empty or oversized values; bound caller allocation before constructing claims.
 func MembershipClaim(key, value []byte) ProofClaim {
 	return ProofClaim{
 		key: append([]byte(nil), key...), value: append([]byte(nil), value...),
@@ -46,7 +49,7 @@ func MembershipClaim(key, value []byte) ProofClaim {
 	}
 }
 
-// AbsenceClaim constructs an exact key absence claim.
+// AbsenceClaim copies a key without admission; verification applies key limits.
 func AbsenceClaim(key []byte) ProofClaim {
 	return ProofClaim{key: append([]byte(nil), key...), valid: true}
 }

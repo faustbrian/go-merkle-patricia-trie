@@ -14,6 +14,8 @@ type retainedFuzzRoot struct {
 	model map[string][]byte
 }
 
+// FuzzCommitRetentionAndPruningStateMachine bounds 64 input bytes to 24 steps/eight
+// leases and checks published and retained roots against independent maps.
 func FuzzCommitRetentionAndPruningStateMachine(f *testing.F) {
 	f.Add([]byte{0x20, 0x01, 0x88, 0x31, 0x90})
 	f.Add([]byte{0x00, 0x20, 0x10, 0x08})

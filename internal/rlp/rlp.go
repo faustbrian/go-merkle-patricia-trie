@@ -1,5 +1,9 @@
 // Package rlp implements the canonical Recursive Length Prefix subset used by
-// Ethereum trie nodes.
+// Ethereum trie nodes (pinned Yellow Paper Appendix B; MPT-DEC-004).
+// Decode requires one complete minimally framed value and copies strings;
+// Encode accepts owned String/List values. Zero Value is an empty string.
+// Byte/item/depth limits are local parser budgets, not cancellation, numeric
+// integer validation or a heap/RSS cap. No I/O, cgo or workers are introduced.
 package rlp
 
 import (
@@ -29,9 +33,12 @@ var (
 
 // Limits bounds encoding and decoding work.
 type Limits struct {
+	// MaxEncodedBytes caps a complete encoded value.
 	MaxEncodedBytes int
-	MaxDepth        int
-	MaxItems        int
+	// MaxDepth caps nesting below the root at depth zero; zero allows only the root.
+	MaxDepth int
+	// MaxItems caps the root and every decoded/encoded descendant.
+	MaxItems int
 }
 
 // DefaultLimits returns conservative standalone RLP limits. Trie operations

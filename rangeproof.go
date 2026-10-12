@@ -7,8 +7,10 @@ import (
 	"slices"
 )
 
-// RangeProof is an immutable deterministic sequence of canonical RLP nodes
-// sufficient to establish every leaf in one explicit key interval.
+// RangeProof owns a witness intended to establish every leaf in a half-open key
+// interval. Imported node bytes are not certified by construction. Completeness
+// and witness order are defensive package policy (MPT-DEC-008), not an Ethereum
+// consensus envelope or authorization of the supplied root.
 type RangeProof struct {
 	nodes [][]byte
 }
@@ -24,7 +26,7 @@ func RangeProofFromNodes(nodes [][]byte, limits Limits) (RangeProof, error) {
 	return RangeProof(proof), nil
 }
 
-// Nodes returns owned copies of the ordered deduplicated encoded nodes.
+// Nodes copies stored transport bytes in order; it does not remove duplicates.
 func (proof RangeProof) Nodes() [][]byte {
 	return Proof(proof).Nodes()
 }
@@ -36,7 +38,8 @@ type RangeItem struct {
 	valid bool
 }
 
-// NewRangeItem copies one key/value leaf for range-proof verification.
+// NewRangeItem copies a leaf without key/value admission. Verification requires
+// nonempty values and strictly ordered in-range keys; bound input before copying.
 func NewRangeItem(key, value []byte) RangeItem {
 	return RangeItem{
 		key:   append([]byte(nil), key...),
@@ -495,6 +498,8 @@ func validateRangeItems(
 	return nil
 }
 
+// Prefix successors bound entire subtrees, allowing exclusion without reading
+// omitted children. An all-f prefix has no finite successor, not an empty range.
 func rangeSubtreeIntersects(prefix []byte, bounds rangeBounds) bool {
 	if len(bounds.endPath) != 0 &&
 		slices.Compare(prefix, bounds.endPath) >= 0 {

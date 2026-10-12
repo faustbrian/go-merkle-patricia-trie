@@ -10,6 +10,9 @@ import (
 	"github.com/faustbrian/go-merkle-patricia-trie/v2/filesystem"
 )
 
+// Filesystem workloads use a populated local temporary directory. Initial
+// setup is excluded; OpenAndGet includes reopen/lookup/close, and Commit includes
+// mutation plus synced publication. WarmGet does not evict the OS page cache.
 func BenchmarkFilesystemWarmGet(b *testing.B) {
 	ctx := context.Background()
 	store, loaded, key, _ := benchmarkFilesystemTrie(b, ctx)

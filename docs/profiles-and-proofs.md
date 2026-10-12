@@ -169,7 +169,9 @@ establishes only the claim under the supplied root. It does not establish that
 the root is canonical-chain, finalized, recent, or authorized.
 
 The package-level `ExampleVerifyAccountProof` is an executable version of the
-account-membership flow and is compiled and run by the documentation gate.
+account-membership flow. Run it with the other examples using
+`go test ./... -run '^Example'`; the configured root documentation route
+checks structure, spelling and links without an example operation.
 
 ## Compatibility evidence
 

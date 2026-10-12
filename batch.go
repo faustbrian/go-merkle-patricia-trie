@@ -20,7 +20,8 @@ type Mutation struct {
 	value []byte
 }
 
-// Put constructs a mutation that stores a non-empty value.
+// Put copies caller bytes for a nonempty-value mutation. It does not validate
+// size/value admission; ApplyBatch does, so bound hostile input before copying.
 func Put(key, value []byte) Mutation {
 	return Mutation{
 		kind: mutationPut, key: append([]byte(nil), key...),
@@ -28,7 +29,8 @@ func Put(key, value []byte) Mutation {
 	}
 }
 
-// Remove constructs a mutation that deletes an existing key.
+// Remove copies a deletion key without size admission. ApplyBatch rejects an
+// absent key and duplicate keys; it does not persist the resulting snapshot.
 func Remove(key []byte) Mutation {
 	return Mutation{kind: mutationRemove, key: append([]byte(nil), key...)}
 }

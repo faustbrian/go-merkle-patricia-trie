@@ -164,7 +164,8 @@ func (store *Store) RetainRoot(
 
 // Retentions returns durable lease handles in stable identifier order. The
 // maximum must cover every retained lease; a smaller bound fails without
-// returning a partial inventory.
+// returning a partial inventory. Repeated inventories recreate handles to the
+// same leases, not independent retentions; releasing one invalidates its siblings.
 func (store *Store) Retentions(
 	ctx context.Context,
 	maximum int,

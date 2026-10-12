@@ -1,4 +1,9 @@
-// Package memory provides an atomic in-memory node store for MPT snapshots.
+// Package memory provides a bounded process-local node store for MPT snapshots.
+// New/NewWithLimits and the zero Store use immutable published maps and atomic
+// optimistic state replacement. Reads/commits/retention/pruning are safe for
+// concurrent use; node copies use read locks, while iterator callbacks run
+// unlocked. Leases do not survive process loss. This package owns no disk,
+// background workers or chain-root authorization.
 package memory
 
 import (
@@ -14,7 +19,9 @@ import (
 // Limits bounds the cumulative immutable nodes retained by one Store. Old
 // roots consume capacity until Prune removes their unreachable nodes.
 type Limits struct {
+	// MaxStoredNodes caps distinct retained hash-addressed nodes.
 	MaxStoredNodes int
+	// MaxStoredBytes caps encoded payloads, not map/header/RSS overhead.
 	MaxStoredBytes int
 }
 
@@ -24,7 +31,9 @@ func DefaultLimits() Limits {
 }
 
 // Store retains immutable encoded nodes and publishes one root at a time.
-// Concurrent reads are safe. Commits use compare-and-swap root semantics.
+// Concurrent use is safe; commits, retentions and pruning validate outside
+// publication locks and can lose an optimistic race with ErrStaleRoot. Leases
+// are process-local; snapshots alone do not pin nodes against later pruning.
 type Store struct {
 	mutex    sync.RWMutex
 	state    *storeState
@@ -66,7 +75,7 @@ func NewWithLimits(limits Limits) (*Store, error) {
 	}, nil
 }
 
-// Root returns the currently published root.
+// Root returns the published root, EmptyRoot for a zero Store, or zero Root for nil.
 func (store *Store) Root() mpt.Root {
 	if store == nil {
 		return mpt.Root{}

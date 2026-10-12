@@ -5,6 +5,8 @@ import (
 	"testing"
 )
 
+// FuzzCanonicalDecodeRoundTrip bounds input to 4096 bytes/depth 64/1024 items and
+// requires accepted RLP to replay exactly.
 func FuzzCanonicalDecodeRoundTrip(f *testing.F) {
 	f.Add([]byte{0x80})
 	f.Add([]byte{0x01})

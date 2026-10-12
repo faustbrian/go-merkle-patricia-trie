@@ -27,14 +27,20 @@ func (entry Entry) Value() []byte {
 // End is exclusive, Prefix is conjunctive with the range, and Limit zero means
 // complete iteration subject to the configured hard result bound.
 type IterationOptions struct {
+	// Prefix selects keys having these bytes as a prefix; empty is unrestricted.
 	Prefix []byte
-	Start  []byte
-	End    []byte
-	Limit  int
+	// Start is the inclusive byte-key lower bound; empty is unrestricted.
+	Start []byte
+	// End is the exclusive byte-key upper bound; empty is unrestricted.
+	End []byte
+	// Limit caps matching deliveries; zero uses the hard configured result ceiling.
+	Limit int
 }
 
 // Iterate streams raw keys in deterministic lexicographic order. The callback
-// runs synchronously without internal locks and must remain bounded.
+// runs synchronously without internal locks and must remain bounded. Options
+// are copied; callback errors or later cancellation/read failures can follow
+// earlier deliveries, which are not rolled back. Callback panics propagate.
 func (trie RawTrie) Iterate(
 	ctx context.Context,
 	options IterationOptions,

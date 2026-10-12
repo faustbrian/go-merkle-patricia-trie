@@ -9,6 +9,8 @@ import (
 	mpt "github.com/faustbrian/go-merkle-patricia-trie/v2"
 )
 
+// FuzzCompactPathCanonicalRoundTrip bounds encoded paths to 64 bytes and requires
+// accepted encodings to replay byte-for-byte.
 func FuzzCompactPathCanonicalRoundTrip(f *testing.F) {
 	f.Add([]byte{0x20})
 	f.Add([]byte{0x31, 0x23})
@@ -33,6 +35,8 @@ func FuzzCompactPathCanonicalRoundTrip(f *testing.F) {
 	})
 }
 
+// FuzzEnvelopeValueValidation bounds payloads to 4096 bytes and checks
+// transaction/receipt framing parity and byte ownership, not field semantics.
 func FuzzEnvelopeValueValidation(f *testing.F) {
 	f.Add(byte(mpt.BerlinProfile), byte(1), []byte{0xc0})
 	f.Add(byte(mpt.OsakaProfile), byte(4), []byte{0xc1, 0x01})
@@ -85,6 +89,8 @@ func FuzzEnvelopeValueValidation(f *testing.F) {
 	})
 }
 
+// FuzzProofVerificationRejectsHostileInput bounds keys/values/a one-node witness and
+// exercises panic safety; discarded errors do not prove rejection.
 func FuzzProofVerificationRejectsHostileInput(f *testing.F) {
 	f.Add(
 		make([]byte, mpt.RootBytes),
@@ -120,6 +126,9 @@ func FuzzProofVerificationRejectsHostileInput(f *testing.F) {
 	})
 }
 
+// FuzzMultiProofVerificationRejectsHostileInput bounds two claims and a one-node
+// witness for panic safety; verification results are discarded, not a rejection
+// oracle.
 func FuzzMultiProofVerificationRejectsHostileInput(f *testing.F) {
 	f.Add(
 		make([]byte, mpt.RootBytes),
@@ -158,6 +167,8 @@ func FuzzMultiProofVerificationRejectsHostileInput(f *testing.F) {
 	})
 }
 
+// FuzzRangeProofVerificationRejectsHostileInput bounds one claimed range leaf and
+// witness for panic safety, not a completeness/rejection oracle.
 func FuzzRangeProofVerificationRejectsHostileInput(f *testing.F) {
 	f.Add(
 		make([]byte, mpt.RootBytes),
@@ -193,6 +204,8 @@ func FuzzRangeProofVerificationRejectsHostileInput(f *testing.F) {
 	})
 }
 
+// FuzzRecoveredNodeRejectsHostileInput bounds a recovered encoding to 4096 bytes and
+// exercises decoding panic safety; outcomes are discarded.
 func FuzzRecoveredNodeRejectsHostileInput(f *testing.F) {
 	f.Add([]byte{0xc2, 0x20, 0x01})
 	f.Add([]byte{0x80})
@@ -216,6 +229,8 @@ func FuzzRecoveredNodeRejectsHostileInput(f *testing.F) {
 	})
 }
 
+// FuzzCollectReachableNodeRejectsHostileInput bounds one stored encoding and
+// cumulative walk work for panic safety, not a graph-validity oracle.
 func FuzzCollectReachableNodeRejectsHostileInput(f *testing.F) {
 	f.Add([]byte{0xc0})
 	f.Add([]byte{0xc2, 0x20, 0x01})
@@ -238,6 +253,8 @@ func FuzzCollectReachableNodeRejectsHostileInput(f *testing.F) {
 	})
 }
 
+// FuzzRawTrieMutationAndIterationModel bounds input to 512 bytes/64 mutations and
+// checks resulting values/count/order against an independent map.
 func FuzzRawTrieMutationAndIterationModel(f *testing.F) {
 	f.Add([]byte{
 		1, 'a', 1, '1',

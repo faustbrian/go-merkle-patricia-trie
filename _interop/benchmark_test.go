@@ -17,6 +17,9 @@ import (
 
 var gethBenchmarkBytes []byte
 
+// BenchmarkComparableRawGetOwned times pinned Geth lookup plus an owned-byte
+// copy on the same 1024-entry corpus/root as the local benchmark. Setup/root
+// equality is excluded; no comparison is valid without equal ownership/corpus.
 func BenchmarkComparableRawGetOwned(b *testing.B) {
 	oracle := gethtrie.NewEmpty(
 		triedb.NewDatabase(rawdb.NewMemoryDatabase(), nil),

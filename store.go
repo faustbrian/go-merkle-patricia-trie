@@ -9,8 +9,13 @@ import (
 )
 
 // NodeReader retrieves canonical encoded nodes by exact legacy Keccak hash.
-// Implementations must return ErrMissingNode when a hash is unavailable.
+// Implementations must return an error matching ErrMissingNode when a hash is
+// unavailable and keep returned bytes stable while callers validate/copy them.
+// Calls are synchronous: providers own cancellation, concurrency and lifetime;
+// trie operations do not recover provider panics or preempt blocked reads.
 type NodeReader interface {
+	// GetNode retrieves bytes for hash or reports absence/read failure. Callers
+	// rehash and decode untrusted responses; a successful read is not root authority.
 	GetNode(ctx context.Context, hash Root) ([]byte, error)
 }
 
@@ -21,6 +26,9 @@ type NodeReader interface {
 // callers reconcile that outcome.
 type NodeStore interface {
 	NodeReader
+	// CommitTrie writes the supplied immutable batch before root publication,
+	// checks PreviousRoot and reports conflicts as ErrStaleRoot. Providers must
+	// distinguish pre-publication refusal from post-publication durability errors.
 	CommitTrie(ctx context.Context, commit StoreCommit) error
 }
 
@@ -28,6 +36,9 @@ type NodeStore interface {
 // IterateNodes must visit at most maximum immutable nodes in ascending hash
 // order and pass owned encoded bytes to yield.
 type NodeIterator interface {
+	// IterateNodes invokes yield synchronously in hash order with owned bytes.
+	// Callback errors stop iteration after any earlier deliveries; providers own
+	// concurrent-mutation semantics and must not hold locks across yield.
 	IterateNodes(
 		ctx context.Context,
 		maximum int,
@@ -101,10 +112,13 @@ func (err *storageError) Is(target error) bool { return target == err.category }
 // MissingNodeError identifies the exact unavailable hash without exposing key
 // or value material.
 type MissingNodeError struct {
-	Hash  Root
+	// Hash identifies the unavailable node without key/value bytes.
+	Hash Root
+	// Cause remains inspectable through Unwrap but is omitted from Error text.
 	Cause error
 }
 
+// Error reports the node hash, not Cause; the receiver must be nonnil.
 func (err *MissingNodeError) Error() string {
 	return fmt.Sprintf("mpt: missing node %x", err.Hash)
 }
@@ -122,10 +136,13 @@ func (err *MissingNodeError) Is(target error) bool {
 // CorruptNodeError identifies the exact hash whose stored bytes failed
 // integrity or canonicality validation.
 type CorruptNodeError struct {
-	Hash  Root
+	// Hash is the requested storage key whose bytes failed integrity/canonicality.
+	Hash Root
+	// Cause remains inspectable through Unwrap but is omitted from Error text.
 	Cause error
 }
 
+// Error reports the node hash, not Cause; the receiver must be nonnil.
 func (err *CorruptNodeError) Error() string {
 	return fmt.Sprintf("mpt: corrupt node %x", err.Hash)
 }

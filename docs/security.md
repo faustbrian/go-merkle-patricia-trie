@@ -5,7 +5,9 @@
 Keys, values, compact paths, encoded nodes, proof nodes, storage responses, and
 fixture updates are untrusted. Stores may omit, corrupt, substitute, replay, or
 partially persist nodes. Contexts, explicit byte/count/depth/hash/read/write
-limits, and checked arithmetic bound work before conversion or allocation.
+limits and checked arithmetic bound admitted work. Constructors without Limits
+copy caller-sized bytes before later validation; bound transport input first.
+Cancellation is cooperative and cannot preempt a blocked provider or file call.
 
 ## Threats
 
@@ -18,8 +20,9 @@ overflow; CPU, memory, storage-read, and disk amplification; slice aliasing and
 concurrent mutation; secret leakage in errors; and compromised dependencies or
 fixtures.
 
-Errors expose bounded metadata and typed causes, never complete keys, values,
-nodes, proofs, preimages, or credentials.
+Default package diagnostics expose bounded metadata and typed causes rather
+than complete keys, values, nodes, proofs, preimages or credentials. Iterator
+callback errors propagate unchanged and remain caller-controlled.
 
 ## Proof limitation
 

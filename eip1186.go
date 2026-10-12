@@ -8,7 +8,9 @@ import (
 )
 
 // Account is a canonically decoded Ethereum state-trie account established by
-// a state-trie lookup or proof under a supplied root.
+// a state-trie lookup or proof under a supplied root. Its zero value is invalid
+// for storage verification. It carries fields, not an authorization or a retained
+// state-root/address stamp; callers own the provenance of the supplied root.
 type Account struct {
 	nonce       uint64
 	balance     [RootBytes]byte
@@ -28,7 +30,9 @@ type StorageProofClaim struct {
 }
 
 // StorageMembershipClaim constructs an exact non-zero storage-value claim.
-// expectedValue is copied and must be a minimal unsigned big-endian integer.
+// expectedValue is copied without admission and must be a minimal nonzero
+// unsigned big-endian integer of at most 32 bytes when verified. It is not RLP.
+// Bound input before construction; VerifyStorageProofs applies aggregate limits.
 func StorageMembershipClaim(
 	slot [RootBytes]byte,
 	expectedValue []byte,

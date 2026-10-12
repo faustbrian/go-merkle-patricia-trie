@@ -31,7 +31,9 @@ next, err = next.Commit(ctx, store)
 `Open` creates the directory when absent, validates the checksummed root
 record, and removes only adapter-named temporary files left by interrupted
 atomic writes. Reads reject symlinks, non-regular files, oversized nodes, and
-bytes whose legacy-Keccak hash does not equal the requested filename.
+bytes whose legacy-Keccak hash does not equal the requested filename. Opening
+checks metadata and inventories filenames; it does not validate every root
+descendant. Use trie access or `CollectReachableNodes` for graph validation.
 
 Every commit:
 
@@ -66,7 +68,10 @@ The caller MUST ensure that only one open `Store` owns a directory. This
 adapter does not provide cross-process locking. `Close` rejects an active
 commit, retention change, or prune operation rather than waiting while
 filesystem I/O is active. In-flight reads do not retain mutable adapter state
-and may finish.
+and may finish. Repeated `Close` returns `ErrClosedStore`, and the last
+observed root remains available. Node iteration snapshots filenames rather than
+retaining a graph; a prune starting afterward can abort it after earlier
+callback deliveries.
 
 ## Limits and recovery scope
 
@@ -110,7 +115,9 @@ removal committed and `Open` will restore any staged nodes.
 ## Security boundary
 
 The directory path is caller-controlled configuration and must not be shared
-with untrusted writers. The adapter validates every exact node read and
+with untrusted writers, including replacement through untrusted ancestors.
+Checks before opening files are not a race-free sandbox. Existing ancestor
+permissions remain caller-owned. The adapter validates every exact node read and
 checksums the root record, but it does not authorize the root, establish chain
 finality, encrypt values, hide access patterns, or protect a directory after
 another process obtains write access.

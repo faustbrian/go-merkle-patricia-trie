@@ -264,6 +264,8 @@ func stagePrune(
 	if err := operations.rename(pending, committedPath); err != nil {
 		return false, storageCommitError(err)
 	}
+	// Rename is the logical commit point. From here cleanup/sync errors return
+	// committed accounting; restoring nodes would contradict Open's recovery rule.
 	rollback = false
 	checkpoint(pruneCommitted)
 	if err := operations.syncDirectory(storePath); err != nil {

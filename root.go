@@ -24,7 +24,8 @@ func EmptyRoot() Root {
 	return canonicalEmptyRoot
 }
 
-// RootFromBytes validates and copies a 32-byte root commitment.
+// RootFromBytes checks only the 32-byte representation and copies it. It does
+// not validate a graph, distinguish a chain root from a node hash, or authorize it.
 func RootFromBytes(value []byte) (Root, error) {
 	if len(value) != RootBytes {
 		return Root{}, fmt.Errorf("%w: got %d bytes", ErrInvalidRoot, len(value))

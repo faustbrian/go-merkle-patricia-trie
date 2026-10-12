@@ -1,4 +1,13 @@
-// Package filesystem provides a durable directory-backed MPT node store.
+// Package filesystem provides directory-backed MPT nodes and version-1 root/
+// retention records. Open owns recovery of adapter temporaries; node writes and
+// root publication use file sync, rename and directory sync. A post-rename sync
+// error may expose the new complete root without confirming crash durability.
+//
+// One Store/process must exclusively own the directory and trusted ancestors;
+// Lstat checks are not a race-free sandbox against hostile path replacement.
+// No OS advisory lock or worker is owned. Storage durability depends on the
+// filesystem's rename/sync semantics. Open validates metadata, not every reachable
+// node; use trie access or CollectReachableNodes for graph integrity checks.
 package filesystem
 
 import (
@@ -60,7 +69,9 @@ func DefaultLimits() Limits {
 
 // Store persists immutable hash-addressed nodes as individual files and
 // publishes one root with atomic rename. A Store is safe for concurrent use
-// within one process. Callers must ensure one Store owns a directory at a time.
+// within one process; writers/retentions/pruning refuse overlapping publication
+// with ErrStaleRoot, rather than waiting. Caller-exclusive directory ownership
+// includes trusted ancestors. Zero/nil Stores are not opened handles.
 type Store struct {
 	mutex               sync.RWMutex
 	path                string
@@ -89,7 +100,11 @@ const (
 )
 
 // Open creates or opens an exclusively owned path, recovers interrupted
-// adapter writes, inventories stored nodes, and validates the published root.
+// adapter writes, inventories stored nodes, and validates the published root record.
+// Validation covers the root record and filenames, not complete node reachability.
+// Existing ancestor permissions are not changed and symlink checks do not exclude
+// adversarial check/open replacement. It can create/recover files before failing;
+// a failed initialization may still have published an empty ROOT record.
 // It returns typed MPT storage, corruption, cancellation, or limit errors.
 func Open(ctx context.Context, path string, limits Limits) (*Store, error) {
 	return openWith(ctx, path, limits, defaultOpenOperations())
@@ -416,7 +431,9 @@ func (store *Store) GetNode(ctx context.Context, hash mpt.Root) ([]byte, error) 
 
 // CommitTrie makes every supplied node durable before atomically publishing
 // its root. Failures can leave unreachable immutable node files, but never a
-// published root whose supplied nodes were not synced first.
+// published root whose supplied nodes were not synced first. A directory-sync
+// error after ROOT rename returns ErrStorageCommit with the new root observable
+// in-process and uncertain crash durability; reconcile Root/reopen before retrying.
 func (store *Store) CommitTrie(
 	ctx context.Context,
 	commit mpt.StoreCommit,
@@ -483,7 +500,11 @@ func (store *Store) CommitTrie(
 	return nil
 }
 
-// IterateNodes visits an immutable directory snapshot in ascending hash order.
+// IterateNodes snapshots bounded node filenames and yields owned bytes in hash
+// order, including unreachable/unpublished immutable nodes. Callbacks run unlocked
+// and errors preserve earlier deliveries. A prune already in progress is refused;
+// one starting later may remove a listed file and abort iteration. This is not a
+// retained point-in-time graph snapshot or root-authority check.
 func (store *Store) IterateNodes(
 	ctx context.Context,
 	maximum int,
@@ -571,7 +592,10 @@ func (store *Store) IterateNodes(
 	return nil
 }
 
-// Close releases this process's store handle. It does not delete durable data.
+// Close marks the handle closed without deleting data or waiting for readers.
+// Overlapping commit/retention/prune returns ErrStorageCommit without closing;
+// repeated Close returns ErrClosedStore. Reads admitted before Close may finish,
+// and Root remains available afterward. No background worker is drained.
 func (store *Store) Close() error {
 	if store == nil {
 		return mpt.ErrInvalidStore
@@ -963,6 +987,9 @@ func readRegularFile(
 	return content, nil
 }
 
+// SHA-256 checksums protect versioned storage metadata against corruption under
+// exclusive directory ownership; they are not MACs or chain-root authorization.
+// Node commitments remain legacy Keccak, independently of this record checksum.
 func encodeRootRecord(root mpt.Root) []byte {
 	record := make([]byte, rootRecordLen)
 	copy(record, rootMagic[:])

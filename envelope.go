@@ -8,7 +8,9 @@ import (
 )
 
 // ForkProfile identifies the execution-specification fork whose typed
-// transaction and receipt envelope activations are being validated.
+// transaction and receipt envelope activations are being validated. The pinned
+// execution-specs revision and EIP-2718 interpretation are MPT-DEC-005, not
+// a promise to execute that fork or validate transaction/receipt semantics.
 type ForkProfile uint8
 
 const (

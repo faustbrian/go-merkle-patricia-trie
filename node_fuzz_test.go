@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+// FuzzCanonicalNodeDecodeRoundTrip bounds input to 4096 bytes and encoding to
+// 4096 nodes/hash operations, requiring accepted nonnull nodes to replay bytes.
 func FuzzCanonicalNodeDecodeRoundTrip(f *testing.F) {
 	f.Add([]byte{0xc2, 0x20, 0x01})
 	f.Add([]byte{0xd1, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x01})
@@ -32,6 +34,8 @@ func FuzzCanonicalNodeDecodeRoundTrip(f *testing.F) {
 	})
 }
 
+// FuzzEthereumStateAndStorageValueDecoding bounds each encoding to 4096 bytes for
+// panic safety; decoded results/errors are not a rejection oracle.
 func FuzzEthereumStateAndStorageValueDecoding(f *testing.F) {
 	f.Add([]byte{0xf8, 0x44, 0x80, 0x80}, []byte{0x01})
 	f.Add([]byte{0xc0}, []byte{0x80})
