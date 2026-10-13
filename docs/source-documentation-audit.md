@@ -263,3 +263,12 @@ The eight existing examples were separately executed with
 `go test ./... -run '^Example' -count=1 -timeout=2m` and passed. The native
 offline specification check accepts all ten unchanged decisions and histories.
 No other runtime, interoperability, fuzz, benchmark or crash campaign was run.
+
+## Objective Enforcement
+
+The checksum-pinned public Tools v2.4.0 verifier now supplies
+`make source-docs-check` as a prerequisite of the existing local and CI Make
+routes. Ordinary shared CI selects strict source-documentation checking and
+requires its result. Native prerequisites, operation budgets, security and
+release controls are retained. Hosted exact-head evidence is recorded by the
+coordination ledger; configuration alone does not establish green delivery.
