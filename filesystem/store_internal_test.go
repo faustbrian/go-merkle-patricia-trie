@@ -2038,6 +2038,27 @@ func TestCommitAndIterationObserveMidOperationFailures(t *testing.T) {
 			t.Errorf("Close(reopened) error = %v", closeErr)
 		}
 	}()
+	if reopened.Root() != commit.Root() {
+		t.Fatalf("Root(reopened after sync failure) = %x, want %x", reopened.Root(), commit.Root())
+	}
+	loaded, err := mpt.LoadRawTrie(reopened.Root(), reopened, mpt.DefaultLimits())
+	if err != nil {
+		t.Fatalf("LoadRawTrie(reconciled) error = %v", err)
+	}
+	for _, key := range []string{"alpha", "beta", "gamma"} {
+		value, readErr := loaded.Get(ctx, []byte(key))
+		want := []byte(key + " persistent value long enough to hash")
+		if readErr != nil || !bytes.Equal(value, want) {
+			t.Fatalf("Get(reconciled %q) = (%q, %v), want %q", key, value, readErr, want)
+		}
+	}
+	if retryErr := reopened.CommitTrie(ctx, commit); !errors.Is(retryErr, mpt.ErrStaleRoot) {
+		t.Fatalf("CommitTrie(blind retry) error = %v, want stale root", retryErr)
+	}
+	if reopened.Root() != commit.Root() {
+		t.Fatalf("Root(after stale retry) = %x, want reconciled %x", reopened.Root(), commit.Root())
+	}
+
 	entries, err := os.ReadDir(reopened.nodesPath)
 	if err != nil || len(entries) < 2 {
 		t.Fatalf("ReadDir() = (%d, %v), want at least 2", len(entries), err)

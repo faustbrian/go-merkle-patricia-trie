@@ -81,6 +81,15 @@ generator corpus, checksum, CC0 dedication, update procedure, and pinned Geth
 and EthereumJS oracle revisions. It is not represented as an official
 Ethereum fixture.
 
+The original local manifest's `@ethereumjs/trie` name was incorrect: the original
+scripts and lock already used `@ethereumjs/mpt` 10.1.2. The original fixture writer
+and execution remain unknown. The current
+[local manifest](../testdata/local-regressions/MANIFEST.md#historical-and-future-producer-identities)
+separates recovered historical oracle/source identity from the new explicit
+future writer and its demonstrated byte-identical reproduction. The preserved
+corpus and its CC0 dedication are unchanged; npm source equivalence and current
+reproduction are not historical generator evidence.
+
 ## Updating
 
 1. Resolve and record the exact upstream commit.

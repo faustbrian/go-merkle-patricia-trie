@@ -6,6 +6,14 @@ All notable changes follow Keep a Changelog and Semantic Versioning.
 
 ### Documentation
 
+- Establish a locked, reproducible EIP-1186 fixture producer without changing
+  corpus bytes or attributing an unknown historical writer. Correct the
+  historical oracle package-name mismatch from authenticated original inputs.
+- Reconcile MPT-DEC-009 with the existing observable post-publication
+  durability-error exception. Preserve atomic complete-root visibility and
+  immutable snapshots; do not claim rollback or power-loss durability.
+  MPT-DEC-009 sha256:627d962fa5351c1deaf5ef9d9654c10a0d0487e8b2b36d6ea1379c8dde5a76b3
+
 - Clarify proof admission versus verified claims, borrowed-reader ownership,
   snapshot and callback limits, and filesystem publication/recovery outcomes
   without changing commitments, proof bytes or persisted records.

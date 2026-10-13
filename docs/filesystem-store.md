@@ -59,6 +59,10 @@ returns `ErrStorageCommit` and `Store.Root` exposes the renamed root. The
 publication outcome is therefore explicit and always points to a complete
 node set, but the caller must treat the durability result as indeterminate and
 reconcile the published root before retrying.
+A commit error does not imply rollback. Process-termination tests establish
+observable complete roots, not power-loss durability after a failed sync.
+The [decision reconciliation](specification-decisions.md#explicit-reconciliation-2026-10-13)
+records why the former unqualified failure wording was contradictory.
 
 ## Ownership and concurrency
 

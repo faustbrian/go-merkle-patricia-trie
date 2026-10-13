@@ -235,7 +235,8 @@
         "TestCommitFailureDoesNotPublishOrChangeSnapshot",
         "TestStoreRejectsStaleRootAtomically",
         "TestConcurrentWritersSerializeWithoutBlockingReaders",
-        "TestCommitSurvivesProcessTerminationAtPublicationBoundaries"
+        "TestCommitSurvivesProcessTerminationAtPublicationBoundaries",
+        "TestCommitAndIterationObserveMidOperationFailures"
       ],
       "fixtures": [],
       "fuzz": [
@@ -247,7 +248,8 @@
       "differential_evidence": [],
       "differential_classification": "not assessed",
       "public_behavior": [
-        "Updates are immutable and publication is atomic after node durability."
+        "Updates are immutable and complete-root publication is atomic after supplied-node durability.",
+        "Pre-publication failures leave the previous root visible; a filesystem post-publication directory-sync failure exposes the new root and requires reconciliation without claiming power-loss durability."
       ]
     },
     {

@@ -456,18 +456,19 @@
         "Publish roots before nodes.",
         "Return immutable snapshots and atomically publish a root only after durable node writes."
       ],
-      "peer_behavior": "Storage lifecycle is package policy rather than Ethereum consensus behavior; the memory and filesystem adapters implement the same publication contract.",
-      "selected_behavior": "Updates return immutable snapshots; commit writes immutable content-addressed nodes before compare-and-swap root publication; failures do not publish or mutate snapshots; loaded snapshots remain source-store bound until rebuilt; readers remain stable while writers serialize publication.",
-      "rationale": "One synchronization and publication contract prevents partial state and stale-root overwrite without changing trie bytes.",
+      "peer_behavior": "Storage lifecycle is package policy rather than Ethereum consensus behavior; memory and filesystem preserve complete-root publication and input snapshots, but only filesystem has a post-publication directory-sync phase.",
+      "selected_behavior": "Updates return immutable snapshots; commit writes immutable content-addressed nodes before compare-and-swap root publication; pre-publication failures preserve the previous root and every failure leaves input snapshots unchanged; filesystem directory-sync failure after ROOT replacement exposes the newly published complete root with indeterminate crash durability, so callers reconcile before retrying; loaded snapshots remain source-store bound until rebuilt; readers remain stable while writers serialize publication.",
+      "rationale": "Distinguish atomic visibility from crash durability under the existing NodeStore contract while preventing partial roots and stale-root overwrite without changing trie bytes.",
       "security_consequences": "Partial writes cannot become committed roots and stale writers cannot silently replace newer state.",
       "resource_consequences": "Node, byte, read, write, depth, and retained-state limits bound operations.",
-      "compatibility_consequences": "Store implementations must honor atomic publication and byte ownership.",
+      "compatibility_consequences": "Preserve the pre-existing NodeStore exception for observable post-publication durability errors; the earlier unqualified failure wording was contradictory, not a runtime policy change. A commit error alone must not be treated as proof that no root was published.",
       "wire_consequences": "Persistence mechanics do not change trie roots or node RLP.",
       "executable_evidence": [
         "TestCommitFailureDoesNotPublishOrChangeSnapshot",
         "TestStoreRejectsStaleRootAtomically",
         "TestConcurrentWritersSerializeWithoutBlockingReaders",
-        "TestCommitSurvivesProcessTerminationAtPublicationBoundaries"
+        "TestCommitSurvivesProcessTerminationAtPublicationBoundaries",
+        "TestCommitAndIterationObserveMidOperationFailures"
       ],
       "fixture_evidence": [],
       "fuzz_evidence": [
