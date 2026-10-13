@@ -1,5 +1,8 @@
 # Architecture
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: Detailed reference](reference.md)
+
 ## Boundary
 
 The root `mpt` package owns canonical paths, nodes, roots, immutable snapshots,

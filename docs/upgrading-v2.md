@@ -1,5 +1,8 @@
 # Upgrading to v2
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: Detailed reference](reference.md)
+
 Use `github.com/faustbrian/go-merkle-patricia-trie/v2` and append `/v2` before
 the `memory` or `filesystem` package path. The source remains on main; the
 release tag is `v2.0.0`. Go 1.27.0 is required. Do not mix v1 and v2 root,

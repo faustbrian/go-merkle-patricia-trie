@@ -1,5 +1,8 @@
 # Ethereum profiles and proofs
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: Detailed reference](reference.md)
+
 ## Profile selection
 
 Choose the public type from the key and value contract, not from a convenience

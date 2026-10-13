@@ -1,5 +1,8 @@
 # Compatibility decisions
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: Adoption, comparison, and migration](adoption.md)
+
 The canonical [specification decision register](specification-decisions.md)
 records the normative sources, alternatives, consequences, executable
 evidence, and reconsideration conditions behind these compatibility outcomes.

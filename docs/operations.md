@@ -1,5 +1,8 @@
 # Operations, storage, and recovery
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: Detailed reference](reference.md)
+
 ## Immutable snapshots and updates
 
 `RawTrie`, `SecureTrie`, `StateTrie`, and `StorageTrie` are immutable logical

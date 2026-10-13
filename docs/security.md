@@ -1,5 +1,8 @@
 # Security
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: Operations, storage, and recovery](operations.md)
+
 ## Trust boundary
 
 Keys, values, compact paths, encoded nodes, proof nodes, storage responses, and

@@ -1,5 +1,8 @@
 # Documentation
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: Documentation map](index.md)
+
 This main branch of `merkle-patricia-trie` targets v2 and requires Go 1.27.0.
 Its root public
 package uses the default import identifier `mpt`; the public `memory` and

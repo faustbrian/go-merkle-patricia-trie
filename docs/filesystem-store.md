@@ -1,5 +1,8 @@
 # Durable filesystem store
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: Detailed reference](reference.md)
+
 The `filesystem` package implements `mpt.NodeStore` and `mpt.NodeIterator`
 without adding a database dependency to the root package. It is intended for a
 single process that owns one store directory.

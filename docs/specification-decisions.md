@@ -1,5 +1,8 @@
 # Merkle Patricia trie specification decisions
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: Detailed reference](reference.md)
+
 This register is the human and machine-auditable boundary for the package's
 Ethereum MPT, RLP, profile, proof, and storage choices. Immutable sources and
 monitored update channels are pinned in

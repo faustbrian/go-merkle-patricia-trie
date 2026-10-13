@@ -1,5 +1,8 @@
 # Benchmark methodology and results
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: Detailed reference](reference.md)
+
 ## Claim boundary
 
 Benchmarks characterize this v1 implementation on one recorded machine.

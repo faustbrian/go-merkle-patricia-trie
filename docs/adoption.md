@@ -1,5 +1,8 @@
 # Adoption, comparison, and migration
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: Operations, storage, and recovery](operations.md)
+
 ## When to use this module
 
 Use this module when an application needs an independently usable Ethereum

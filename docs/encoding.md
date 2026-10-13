@@ -1,5 +1,8 @@
 # Encoding and commitment contract
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: Detailed reference](reference.md)
+
 This document describes the byte-level contract implemented by the core trie.
 The pinned specifications and client revisions supporting the contract are
 listed in [source provenance](source-provenance.md). Compatibility decisions

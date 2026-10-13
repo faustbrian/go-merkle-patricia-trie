@@ -1,5 +1,8 @@
 # Source provenance
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: Detailed reference](reference.md)
+
 The [specification decision register](specification-decisions.md) maps these
 normative and interoperability inputs to selected behavior and executable
 evidence.

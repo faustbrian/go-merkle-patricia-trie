@@ -1,5 +1,8 @@
 # MPT family threat model
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: Operations, storage, and recovery](operations.md)
+
 ## Scope and assets
 
 This model covers the root `mpt` package, canonical internal RLP codec, memory
