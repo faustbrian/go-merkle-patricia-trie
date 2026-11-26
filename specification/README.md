@@ -16,6 +16,52 @@ machine-readable evidence map.
 
 ## Upstream review history
 
+### 2026-11-26
+
+All twelve monitored authority responses were retrieved with the checker's
+request profile. The seven immutable normative sources retain their recorded
+SHA-256 digests, as does the Yellow Paper change feed. Four change feeds
+moved; each new digest was stable across two independent requests:
+
+| Authority | Previous SHA-256 | Current SHA-256 |
+| --- | --- | --- |
+| `execution-spec-changes` | `9e3cfa6e4eedcd6b2b63f9eae312ea45ccc72432f834d28dd01c673e3beae6e4` | `5818d1c893ae75760644fc3cc7093f3444741a4ab9dbcd993febde030fcf794d` |
+| `eip-changes` | `a9397d494eec951adcf3a68f14f47878cc8293841eb1e40917ee4861fbf609f6` | `95d701e10d3512b61d775fb7976602ba9be321f8252d3b6fb1d9f0980ae35a89` |
+| `geth-releases` | `b7409d7179b3a4ec85dec82b45245f2a8fbfa16e50a9d10cfc1802e31b7b8ae1` | `de8b6c03a5f8c80ab9bc1fc5b3de41d4b72c8cf8347d36ef5c12f68412b29ae6` |
+| `go-releases` | `c44cbd90c80f6b625e4306e3014f0cbd6921f8cf93475af7763999e7db55fdc5` | `6312b3ffe7fe5d33dbe68d7db7105d621cb8428a67b483bc514cfcfa041a8361` |
+
+- The execution-specifications Amsterdam feed advanced from commit
+  `a87891f7e69eab1f903233c61c5514d8c94bd5d1` to
+  `16898000911c1e3caa57be08509536c10ae92d3e`. The eleven intervening commits
+  change test fillers, test tooling, fixture documentation, and per-fork EVM
+  gas and instruction modules. None touches
+  `src/ethereum/merkle_patricia_trie.py`, which retains Git blob
+  `0dbf455ad215e7c8f25ae35cf5149e1fc957b2a1` on the branch; its last change
+  predates the previous review. EVM execution remains caller-owned.
+- The EIPs feed advanced from commit
+  `69075f1b54fc4a116b41f75461a9868755a83e41` to
+  `ade9e9cab7e148bba4cd293f916a4a189cd7a8aa`. The 151 intervening commits
+  change 172 files, including new draft proposals and updates to EIP-7778,
+  EIP-8024, EIP-8070, EIP-8131, EIP-8279, EIP-8288 and EIP-8456. EIP-2718 and
+  EIP-1186 are untouched and retain Git blobs
+  `83a19b0fa865dc31b483cd97f35c417928792d7c` and
+  `1a341c3f9b8094955d386ad63b5c04e3bcc491f3` on master.
+- The Geth release feed advanced through v1.17.8, v1.17.9 and v1.17.10.
+  `trie/proof.go` in each of those tags is byte-identical to pinned v1.17.3,
+  with SHA-256
+  `f1092b71ebdda4f11a54a7a1c27f6ccbc0599455f2bfab68615600442564deb8`.
+  The maintained-peer oracle remains v1.17.3; this review does not claim
+  execution against the latest client.
+- The Go release feed advanced through Go 1.26.9 to 1.26.11 and Go 1.27.2 to
+  1.27.4. `doc/go_mem.html` at go1.26.11 and go1.27.4 is byte-identical to
+  the pinned go1.26.0 memory model, with SHA-256
+  `a7372b4f36c9525ecc7531bbdbb9e53746ae3f58367a25fe8084d5a35bb8ee7c`.
+- No root, encoding, proof, range-witness, snapshot or authority-precedence
+  contract changes. All ten decisions, normative pins, fixtures, peer pins
+  and selected behavior remain unchanged. Only the four
+  change-feed digests above were updated; URLs and the 30-day interval are
+  unchanged.
+
 ### 2026-10-06
 
 - Reviewed only the EIPs change feed advancement from
